@@ -3,6 +3,7 @@ import { auth } from './firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import {HomePage}  from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
 
 function App() {
   const [user, loading] = useAuthState(auth);
@@ -15,6 +16,11 @@ function App() {
           path="/" 
           // element={user ? <HomePage /> : <Navigate to="/auth" />} 
           element= {<HomePage/>}
+        />
+        <Route 
+          path="/login" 
+          // element={user ? <HomePage /> : <Navigate to="/auth" />} 
+          element= { <LoginPage/> }
         />
       </Routes>
     

@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { useNavigate } from 'react-router-dom';
 
 
 const pages = ['Home', 'Features', 'About'];
@@ -20,6 +21,8 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 function Navbar({authUser}) {
 const [anchorElNav, setAnchorElNav] = React.useState(null);
 const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+let navigate = useNavigate();
 
 const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -124,9 +127,11 @@ return (
             {pages.map((page) => (
             <Typography
                 key={page}
-                onClick={()=>{alert(page)}}
+                onClick={()=>{
+                    navigate(`/${page}`)
+                }}
                 sx={{ my: 3, color: '#F5F5F5C5', display: 'block', mx:2, px:1, textTransform:"none",
-                    fontSize:'1.3em',
+                    fontSize:'1.1em',
                     position: 'relative',
                     fontWeight: '400',
                     fontFamily: 'unset',
@@ -156,15 +161,19 @@ return (
         <Box sx={{ flexGrow: 0 }}>
             {!authUser ? (
                 <>
-                    <Button variant="text" color="white" sx={{
+                    <Button variant="text" color="white" 
+                    onClick={()=>{
+                        navigate('/login');
+                    }}
+                    sx={{
                         background: 'linear-gradient(90deg, #4F46E5, #9F7AEA)', 
                         borderRadius:'32px',
                         textTransform: 'none',
                         px:2,
                         py:1,
-                        fontSize:'1.2em',
+                        fontSize:'1.1em',
                         fontWeight:'300',
-                        display: { xs: 'none', md: 'flex' }, mr: 1 
+                        display: { xs: 'none', md: 'flex' }, mr: 1 ,
                     }}>
                         LogIn / SignUp
                     </Button>
