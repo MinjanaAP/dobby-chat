@@ -120,6 +120,9 @@ return (
                 sx={{ my: 3, color: '#F5F5F5C5', display: 'block', mx:2, px:1, textTransform:"none",
                     fontSize:'1.3em',
                     position: 'relative',
+                    fontWeight: '400',
+                    fontFamily: 'unset',
+                    cursor:'pointer',
                     '&::after': {
                         content: '""',
                         position: 'absolute',
@@ -133,6 +136,9 @@ return (
                     '&:hover::after': {
                         width: '100%', 
                     },
+                    '&:hover':{
+                        color: '#FFFFFF'
+                    }
                 }}
             >
                 {page}
@@ -142,8 +148,16 @@ return (
         <Box sx={{ flexGrow: 0 }}>
             {!authUser ? (
                 <>
-                    <Button variant="text" color="primary">
-                        Signin/SignUp
+                    <Button variant="text" color="white" sx={{
+                        background: 'linear-gradient(90deg, #4F46E5, #9F7AEA)', 
+                        borderRadius:'32px',
+                        textTransform: 'none',
+                        px:2,
+                        py:1,
+                        fontSize:'1.2em',
+                        fontWeight:'300',
+                    }}>
+                        SignIn / SignUp
                     </Button>
                 </>
             ):(
