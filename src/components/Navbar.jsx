@@ -40,14 +40,18 @@ return (
     <AppBar position="static" sx={{ backgroundColor:"#0A0A1F", borderBottom:"1px solid", borderBottomColor:"#2A2A4A" }}>
     <Container maxWidth="xl">
         <Toolbar disableGutters>
-        <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+        {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} >
+            <img src="/src/assets/images/dobby-logo-enhanced.png" alt="dobby-logo" width='40px' />
+        </Box>
+        
         <Typography
             variant="h6"
             noWrap
             component="a"
             href="#app-bar-with-responsive-menu"
             sx={{
-            mr: 2,
+            mx: 2,
             display: { xs: 'none', md: 'flex' },
             fontFamily: 'monospace',
             fontWeight: 700,
@@ -57,6 +61,7 @@ return (
             }}
         >
             Dobby
+            
         </Typography>
         {/* //! Mobile view */}
         <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none', } }}>
@@ -93,7 +98,10 @@ return (
             ))}
             </Menu>
         </Box>
-        <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+        {/* <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} /> */}
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }}>
+            <img src="/src/assets/images/dobby-logo-enhanced.png" alt="dobby-logo" width='40px' />
+        </Box>
         <Typography
             variant="h5"
             noWrap
@@ -103,11 +111,11 @@ return (
             mr: 2,
             display: { xs: 'flex', md: 'none' },
             flexGrow: 1,
-            fontFamily: 'monospace',
             fontWeight: 700,
             letterSpacing: '.3rem',
             color: 'inherit',
             textDecoration: 'none',
+            fontSize: '1.3em'
             }}
         >
             Dobby
@@ -156,8 +164,20 @@ return (
                         py:1,
                         fontSize:'1.2em',
                         fontWeight:'300',
+                        display: { xs: 'none', md: 'flex' }, mr: 1 
                     }}>
-                        SignIn / SignUp
+                        LogIn / SignUp
+                    </Button>
+                    <Button variant="text" color="white" sx={{
+                        background: 'linear-gradient(90deg, #4F46E5, #9F7AEA)', 
+                        borderRadius:'32px',
+                        textTransform: 'none',
+                        px:2,
+                        fontSize:'1em',
+                        fontWeight:'300',
+                        display: { xs: 'flex', md: 'none' }
+                    }}>
+                        Login
                     </Button>
                 </>
             ):(
