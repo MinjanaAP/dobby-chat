@@ -31,11 +31,21 @@ try {
 };
 
 export const signInWithEmail = async (email, password) => {
-try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    return result.user;
-} catch (error) {
-    console.error("Email sign-in error:", error);
-    throw error;
-}
+    try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        return result.user;
+    } catch (error) {
+        console.error("Email sign-in error:", error);
+        throw error;
+    }
 };
+
+export const createUserWithEmailPassword = async (email, password) =>{
+    try {
+        const result = await createUserWithEmailPassword(auth, email, password);
+        return result.user;
+    } catch (error) {
+        console.error("Email sign-in error:", error);
+        throw error;
+    }
+}
