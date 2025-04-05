@@ -1,27 +1,26 @@
-import { Box, Paper, Typography, Button, Divider, TextField, FormControlLabel, Checkbox, setRef, Alert } from "@mui/material";
-import React, { useState } from "react";
+import { Box, Paper, Typography, Button, Divider, TextField, FormControlLabel, Checkbox, setRef, IconButton, Avatar } from "@mui/material";
+import React, { useRef, useState } from "react";
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlineIcon from '@mui/icons-material/LockOutline';
-import { CheckBox } from "@mui/icons-material";
-import { Link, useNavigate } from "react-router-dom";
+import { CheckBox, Upload } from "@mui/icons-material";
+import { Link } from "react-router-dom";
 import ArrowRight from '@mui/icons-material/ArrowForward';
 import { signInWithGoogle, signInWithEmail } from "../firebase";
 
-const LoginForm = ()=>{
+const SignUpForm = ()=>{
     const [checked, setChecked] = useState(false);
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
-    
-
+    const fileInputRef = useRef(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     const handleCheck = (event) => {
         setChecked(event.target.checked);
     }
 
-
     const handleSubmit = async (e) =>{
-        setError('');
+        
         e.preventDefault();
         try {
             await signInWithEmail(email, password);
@@ -30,13 +29,17 @@ const LoginForm = ()=>{
         }
     }
 
-    const handleGoogleSignIn = async () =>{
-        try {
-            await signInWithGoogle();
-        } catch (error) {
-            setError(error.message);
-        }   
+    const handleImageChange =(e) =>{
+        const file = e.target.files[0];
+        if(file){
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result);
+            };
+            reader.readAsDataURL(file); 
+        }
     }
+
 
 
     return(
@@ -60,45 +63,41 @@ const LoginForm = ()=>{
                         WebkitTextFillColor: 'transparent',
                     }}
                 >
-                    Welcome Back
+                    Create Account
                 </Typography>
                 <Typography variant="body2" color="gray" mt={1}>
-                    Sign in to continue to Dobby ~ Chat
+                    Join Dobby ~ Chat today
                 </Typography>
             </Box>
 
-            <Button
-            fullWidth
-            variant='outlined'
-            onClick={handleGoogleSignIn}
-            startIcon={<img src="https://www.google.com/favicon.ico" alt="Google" width={20} height={20} />}
-            sx={{
-                color: 'white',
-                textTransform:'none',
-                borderColor: 'rgba(255,255,255,0.2)',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.15)',
-                },
-                py:1.5,
-                borderRadius: '12px',
-                fontSize: '1em'
-            }}
-            >
-                Continue with Google
-            </Button>
-
-            <Divider sx={{ my: 3, borderColor: 'gray' ,
-                '&::before, &::after': {
-                    borderColor: 'gray', 
-                    },
-            }} orientation="horizontal">
-                <Typography variant="caption" color="gray" fontSize={14}>
-                    Or continue with
+            {/* //? Profile Image Upload */}
+            <Box display='flex' flexDirection='column' alignItems='center' mb={3} >
+                <IconButton onClick={()=> fileInputRef.current?.click() } >
+                    <Avatar
+                        src={previewUrl || ''}
+                        sx={{
+                            width: 96,
+                            height: 96,
+                            border: '2px dashed #4f46e5',
+                            backgroundColor: previewUrl ? 'transparent' : 'rgba(255,255,255,0.05)'
+                        }}
+                    >
+                        {!previewUrl && <Upload style={{ color: 'gray' }} />}
+                    </Avatar>
+                </IconButton>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/"
+                    hidden
+                />
+                <Typography variant="caption" color="gray">
+                    Click to upload profile picture
                 </Typography>
-            </Divider>
+            </Box>
 
-            <Box component='form' noValidate autoComplete="off" display='flex' flexDirection='column' gap={2} >
+            <Box component='form' display='flex' flexDirection='column' gap={2} >
                 <Box position='relative'>
                     <MailOutlineIcon style={{ position: 'absolute', top: '50%', left: 12, transform: 'translateY(-50%)', color: 'gray' }} />
                     <TextField
@@ -158,9 +157,6 @@ const LoginForm = ()=>{
                         }}
                     />
                 </Box>
-                {error && (
-                    <Alert severity="error" variant="outlined" color=""><Typography variant="error" color="error">{error}</Typography></Alert>
-                )}
 
                 <Box display='flex' justifyContent='space-between' alignContent='center' >
                     <FormControlLabel 
@@ -193,11 +189,10 @@ const LoginForm = ()=>{
                 >
                     Sign in
                 </Button>
-                <Link to="/signup">Don't have an account? Sign Up</Link>
-                
+
             </Box>
         </Paper>
     )
 }
 
-export default LoginForm;
+export default SignUpForm;
