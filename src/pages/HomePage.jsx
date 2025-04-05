@@ -5,7 +5,7 @@ import React from "react";
 import FloatingBubbles from "../components/FloatingBubbles";
 import HeroSection from "../components/HeroSection";
 
-export const HomePage =()=>{
+export const HomePage =({user})=>{
     return(
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden", margin: 0, position: "relative", }}>
             {/* Background */}
@@ -13,11 +13,9 @@ export const HomePage =()=>{
             {/* <FloatingBubbles/> */}
 
             {/* Foreground Content */}
-            <Navbar authUser={false} />
-            {/* <Box sx={{ padding: 2, position: "relative", zIndex: 10 }}>
-                <Typography variant="h4">HomePage</Typography>
-            </Box> */}
-            <HeroSection/>
+            <Navbar authUser={user} />
+            
+            <HeroSection authUser={user}/>
         </Box>
     )
 }

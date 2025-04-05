@@ -5,11 +5,11 @@ import { Box, Typography } from "@mui/material";
 import LoginForm from "../components/LoginForm";
 
 
-const LoginPage = () =>{
+const LoginPage = ({user}) =>{
     return(
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden", margin: 0, position: "relative", }} >
             <WaveBackground/>
-            <Navbar/>
+            <Navbar authUser={user}/>
             <Box 
                 sx={{
                     display: "flex",

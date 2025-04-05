@@ -193,7 +193,19 @@ const LoginForm = ()=>{
                 >
                     Sign in
                 </Button>
-                <Link to="/signup">Don't have an account? Sign Up</Link>
+                <Box mt={4} textAlign="center">
+                    <Typography variant="body2" color="gray">
+                    Don't have an account?{' '}
+                    <Link
+                        to='/signup'
+                        component="button"
+                        onClick={()=>{}}
+                        sx={{ color: '#4f46e5', '&:hover': { color: '#6366f1' }, fontWeight: 500 }}
+                    >
+                        Sign Up
+                    </Link>
+                    </Typography>
+                </Box>
                 
             </Box>
         </Paper>

@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
 apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -16,6 +17,7 @@ appId: import.meta.env.VITE_FIREBASE_APP_ID,
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 // export const rtdb = getDatabase();
 export const googleProvider = new GoogleAuthProvider();
 
@@ -42,7 +44,7 @@ export const signInWithEmail = async (email, password) => {
 
 export const createUserWithEmailPassword = async (email, password) =>{
     try {
-        const result = await createUserWithEmailPassword(auth, email, password);
+        const result = await createUserWithEmailAndPassword(auth, email, password);
         return result.user;
     } catch (error) {
         console.error("Email sign-in error:", error);
