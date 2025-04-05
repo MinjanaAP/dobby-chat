@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -13,6 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useNavigate } from 'react-router-dom';
+import { getUserDetails } from '../services/userServices';
 
 
 const pages = ['Home', 'Features', 'About'];
@@ -21,6 +23,21 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 function Navbar({authUser}) {
 const [anchorElNav, setAnchorElNav] = React.useState(null);
 const [anchorElUser, setAnchorElUser] = React.useState(null);
+const [name, setName] = useState('');
+const [profileImageUrl, setProfileImageUrl] = useState('');
+
+useEffect(()=>{
+    if(!authUser) return;
+    // console.log(JSON.stringify(authUser, null, 2))
+    GetUserDetails();
+},[authUser])
+
+const GetUserDetails = async ()=>{
+    const user = await getUserDetails(authUser?.uid);
+    // console.log('user details',JSON.stringify(user, null, 2));
+    setName(user.name);
+    setProfileImageUrl(user.profileImageUrl);
+}
 
 let navigate = useNavigate();
 
@@ -38,6 +55,7 @@ const handleCloseNavMenu = () => {
 const handleCloseUserMenu = () => {
     setAnchorElUser(null);
 };
+
 
 return (
     <AppBar position="static" sx={{ backgroundColor:"#0A0A1F", borderBottom:"1px solid", borderBottomColor:"#2A2A4A" }}>
@@ -193,7 +211,7 @@ return (
                 <>
                     <Tooltip title="Open settings">
                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar alt="Dobby" src="/static/images/avatar/2.jpg" />
+                        <Avatar alt={authUser.email} src={profileImageUrl} />
                     </IconButton>
                     </Tooltip>
                     <Menu

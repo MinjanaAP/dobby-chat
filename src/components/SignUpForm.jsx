@@ -3,10 +3,11 @@ import React, { useRef, useState } from "react";
 import { CheckBox, Email, Lock, Password, PasswordOutlined, Person3, Storage, Upload} from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import ArrowRight from '@mui/icons-material/ArrowForward';
-import {createUserWithEmailPassword, db, storage } from "../firebase";
+import {auth, createUserWithEmailPassword, db, storage } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const SignUpForm = ()=>{
     const [name, setName] = useState('');
@@ -21,6 +22,8 @@ const SignUpForm = ()=>{
     const fileInputRef = useRef(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [profileImage, setProfileImage] = useState(null);
+
+    const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
 
     const handleSubmit = async (e) =>{
         
@@ -39,14 +42,31 @@ const SignUpForm = ()=>{
         if (password !== confirmPassword) return SetConfirmPasswordError('Passwords do not match');
 
         try {
-            const user = await createUserWithEmailPassword(email, password);
+            // const user = await createUserWithEmailPassword(email, password);
+
+            const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+
+            const user = userCredentials.user;
 
             //? Upload profile image to firebase Storage
             let profileImageUrl = null;
             if(profileImage){
-                const imageRef = ref(storage, `profileImages/${user.uid}/${uuidv4()}`);
-                await uploadBytes(imageRef, profileImage);
-                profileImageUrl = await getDownloadURL(imageRef);
+                
+                const formData = new FormData();
+                formData.append('file', profileImage);
+                formData.append('upload_preset', 'dobby-chat' );
+
+                const response = await fetch(`https://api.cloudinary.com/v1_1/dtv1nvsx9/image/upload`,{
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (data.secure_url) {
+                    profileImageUrl = data.secure_url;
+                } else {
+                throw new Error("Failed to upload image to Cloudinary");
+                }
             }
 
             //? Save User Data in fireStore
@@ -58,6 +78,7 @@ const SignUpForm = ()=>{
 
             console.log('User created and data saved.');
         } catch (error) {
+            console.error("Registration error:", error);
             setError(error.message);
         }
     }
