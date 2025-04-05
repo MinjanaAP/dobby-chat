@@ -3,11 +3,11 @@ import WaveBackground from "../components/WaveBackground";
 import Navbar from "../components/NAvbar";
 import { Box, Typography } from "@mui/material";
 
-const SignUpPage = ()=>{
+const SignUpPage = ({user})=>{
     return(
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden", margin: 0, position: "relative", }} >
             <WaveBackground/>
-            <Navbar/>
+            <Navbar authUser={user}/>
             <Box 
                 sx={{
                     display: "flex",

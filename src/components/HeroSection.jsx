@@ -1,8 +1,18 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from "react-router-dom";
 
-const HeroSection = ({ onGetStarted }) => {
+const HeroSection = ({ authUser }) => {
+    const navigate = useNavigate();
+    const onGetStarted=()=>{
+        if(authUser){
+            navigate('/message')
+        }else{
+            navigate('/login')
+        }
+    }
+
 return (
     <Box
     component="section"

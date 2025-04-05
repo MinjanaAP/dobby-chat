@@ -9,21 +9,21 @@ import SignUpPage from './pages/SignUpPage';
 function App() {
   const [user, loading] = useAuthState(auth);
 
-  if(loading) return <div>Loading ...</div>
+  // if(loading) return <div>Loading ...</div>
   return (
     <BrowserRouter>
       <Routes>
       <Route 
           path="/" 
-          element={<HomePage/>}
+          element={<HomePage user={user}/>}
         />
         <Route 
           path="/login" 
-          element={!user ? <LoginPage/> : <Navigate to="/" />} 
+          element={!user ? <LoginPage user={user}/> : <Navigate to="/" />} 
         />
         <Route 
           path="/signup" 
-          element={!user ? <SignUpPage/> : <Navigate to="/" />} 
+          element={!user ? <SignUpPage user={user}/> : <Navigate to="/" />} 
         />
         <Route 
           path="/Home" 

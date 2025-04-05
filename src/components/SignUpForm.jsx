@@ -1,43 +1,78 @@
-import { Box, Paper, Typography, Button, Divider, TextField, FormControlLabel, Checkbox, setRef, IconButton, Avatar } from "@mui/material";
+import { Box, Paper, Typography, Button, Divider, TextField, FormControlLabel, Checkbox,  IconButton, Avatar, Alert } from "@mui/material";
 import React, { useRef, useState } from "react";
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import LockOutlineIcon from '@mui/icons-material/LockOutline';
-import { CheckBox, Upload } from "@mui/icons-material";
+import { CheckBox, Email, Lock, Password, PasswordOutlined, Person3, Storage, Upload} from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import ArrowRight from '@mui/icons-material/ArrowForward';
-import { signInWithGoogle, signInWithEmail } from "../firebase";
+import {createUserWithEmailPassword, db, storage } from "../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
+import { doc, setDoc } from "firebase/firestore";
 
 const SignUpForm = ()=>{
-    const [checked, setChecked] = useState(false);
+    const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
+    const [nameError, SetNameError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, SetPasswordError] = useState('');
+    const [confirmPasswordError, SetConfirmPasswordError] = useState('');
     const fileInputRef = useRef(null);
     const [previewUrl, setPreviewUrl] = useState(null);
-
-    const handleCheck = (event) => {
-        setChecked(event.target.checked);
-    }
+    const [profileImage, setProfileImage] = useState(null);
 
     const handleSubmit = async (e) =>{
         
         e.preventDefault();
+
+        setError('');
+        SetNameError('');
+        setEmailError('');
+        SetPasswordError('');
+        SetConfirmPasswordError('');
+
+        if (!name.trim()) return SetNameError('Name is required');
+        if (!email.trim()) return setEmailError('Email is required');
+        if (!password.trim()) return SetPasswordError('Password is required');
+        if (password.length < 6) return SetPasswordError('Password must be at least 6 characters');
+        if (password !== confirmPassword) return SetConfirmPasswordError('Passwords do not match');
+
         try {
-            await signInWithEmail(email, password);
+            const user = await createUserWithEmailPassword(email, password);
+
+            //? Upload profile image to firebase Storage
+            let profileImageUrl = null;
+            if(profileImage){
+                const imageRef = ref(storage, `profileImages/${user.uid}/${uuidv4()}`);
+                await uploadBytes(imageRef, profileImage);
+                profileImageUrl = await getDownloadURL(imageRef);
+            }
+
+            //? Save User Data in fireStore
+            await setDoc(doc(db, "users", user.uid),{
+                username:name,
+                email:email,
+                profileImageUrl: profileImageUrl,
+            });
+
+            console.log('User created and data saved.');
         } catch (error) {
             setError(error.message);
         }
     }
 
     const handleImageChange =(e) =>{
-        const file = e.target.files[0];
-        if(file){
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewUrl(reader.result);
-            };
-            reader.readAsDataURL(file); 
-        }
+        const files = e.target?.files;
+        if (!files || files.length === 0) return;
+
+        const file = files[0];
+        setProfileImage(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setPreviewUrl(reader.result);
+        };
+        reader.readAsDataURL(file);
     }
 
 
@@ -89,7 +124,7 @@ const SignUpForm = ()=>{
                     type="file"
                     ref={fileInputRef}
                     onChange={handleImageChange}
-                    accept="image/"
+                    accept="image/*"
                     hidden
                 />
                 <Typography variant="caption" color="gray">
@@ -98,18 +133,19 @@ const SignUpForm = ()=>{
             </Box>
 
             <Box component='form' display='flex' flexDirection='column' gap={2} >
-                <Box position='relative'>
-                    <MailOutlineIcon style={{ position: 'absolute', top: '50%', left: 12, transform: 'translateY(-50%)', color: 'gray' }} />
-                    <TextField
-                        fullWidth
-                        placeholder="Email Address"
-                        type="email"
-                        variant="outlined"
-                        onChange={(e)=>{
-                            setEmail(e.target.value);
-                        }}
-                        InputProps={{
-                            sx: {
+                <TextField
+                    placeholder="Full name"
+                    error={nameError}
+                    label= {nameError ? 'Error' : ''}
+                    helperText = {nameError}
+                    type="text"
+                    onChange={(e)=>{
+                        setName(e.target.value);
+                    }}
+                    value={name}
+                    InputProps={{
+                        startAdornment: <Person3 style={{ marginRight: 8, color: 'gray' }}/>,
+                        sx: {
                             pl: 5,
                             letterSpacing:'.8px',
                             backgroundColor: 'rgba(255,255,255,0.05)',
@@ -121,25 +157,28 @@ const SignUpForm = ()=>{
                             },
                             '& fieldset': {
                                 borderColor: 'rgba(255,255,255,0.1)',
-                                borderRadius: '12px', 
+                                borderRadius: '8px', 
                             },
-                        },
-                        }}
-                    />
-                </Box>
-
-                <Box position='relative'>
-                    <LockOutlineIcon style={{ position: 'absolute', top: '50%', left: 12, transform: 'translateY(-50%)', color: 'gray' }} />
-                    <TextField
-                        fullWidth
-                        placeholder="Password"
-                        type="password"
-                        variant="outlined"
-                        onChange={(e)=>{
-                            setPassword(e.target.value);
-                        }}
-                        InputProps={{
-                            sx: {
+                    }
+                    }}
+                    fullWidth
+                    variant="outlined"
+                >
+                </TextField>
+                <TextField
+                    placeholder="email"
+                    type="email"
+                    required
+                    error={emailError}
+                    label= {emailError ? 'Error' : ''}
+                    helperText = {emailError}
+                    onChange={(e)=>{
+                        setEmail(e.target.value);
+                    }}
+                    value={email}
+                    InputProps={{
+                        startAdornment: <Email style={{ marginRight: 8, color: 'gray' }}/>,
+                        sx: {
                             pl: 5,
                             letterSpacing:'.8px',
                             backgroundColor: 'rgba(255,255,255,0.05)',
@@ -151,24 +190,80 @@ const SignUpForm = ()=>{
                             },
                             '& fieldset': {
                                 borderColor: 'rgba(255,255,255,0.1)',
-                                borderRadius: '12px', 
+                                borderRadius: '8px', 
                             },
-                        },
-                        }}
-                    />
-                </Box>
-
-                <Box display='flex' justifyContent='space-between' alignContent='center' >
-                    <FormControlLabel 
-                        control={ <Checkbox sx={{ color: '#4f46e5' }} checked={checked} onChange={handleCheck} /> }
-                        label={ <Typography color="gray" >Remember me</Typography> }
-                    />
-
-                    <Link href="#" underline="hover" color="#4f46e5" >
-                        Forgot Password ?
-                    </Link>
-                </Box>
-
+                    }
+                    }}
+                    fullWidth
+                    variant="outlined"
+                />
+                <TextField
+                    placeholder="Password"
+                    type="password"
+                    required
+                    error={passwordError}
+                    label= {passwordError ? 'Error' : ''}
+                    helperText = {passwordError}
+                    onChange={(e)=>{
+                        setPassword(e.target.value);
+                    }}
+                    value={password}
+                    InputProps={{
+                        startAdornment: <Lock style={{ marginRight: 8, color: 'gray' }}/>,
+                        sx: {
+                            pl: 5,
+                            letterSpacing:'.8px',
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            color: 'white',
+                                '& input::placeholder': {
+                                color: '#F5F5F563',
+                                opacity: 1,
+                            },
+                            '& fieldset': {
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderRadius: '8px', 
+                            },
+                    }
+                    }}
+                    fullWidth
+                    variant="outlined"
+                />
+                <TextField
+                    placeholder="Confirm password"
+                    type="password"
+                    required
+                    error={confirmPasswordError}
+                    label= {confirmPasswordError ? 'Error' : ''}
+                    helperText = {confirmPasswordError}
+                    onChange={(e)=>{
+                        setConfirmPassword(e.target.value);
+                    }}
+                    value={confirmPassword}
+                    InputProps={{
+                        startAdornment: <Lock style={{ marginRight: 8, color: 'gray' }}/>,
+                        sx: {
+                            pl: 5,
+                            letterSpacing:'.8px',
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            color: 'white',
+                                '& input::placeholder': {
+                                color: '#F5F5F563',
+                                opacity: 1,
+                            },
+                            '& fieldset': {
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderRadius: '8px', 
+                            },
+                    }
+                    }}
+                    fullWidth
+                    variant="outlined"
+                />
+                {error && (
+                    <Alert severity="error" variant="outlined" color=""><Typography variant="error" color="error">{error}</Typography></Alert>
+                )}
                 <Button
                     type="submit"
                     variant="contained"
@@ -187,9 +282,22 @@ const SignUpForm = ()=>{
                     }}
                     endIcon={<ArrowRight size={16} />}
                 >
-                    Sign in
+                    Create Account
                 </Button>
 
+                <Box mt={4} textAlign="center">
+                    <Typography variant="body2" color="gray">
+                    Already have an account?{' '}
+                    <Link
+                        to='/login'
+                        component="button"
+                        onClick={()=>{}}
+                        sx={{ color: '#4f46e5', '&:hover': { color: '#6366f1' }, fontWeight: 500 }}
+                    >
+                        Sign in
+                    </Link>
+                    </Typography>
+                </Box>
             </Box>
         </Paper>
     )
