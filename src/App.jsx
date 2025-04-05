@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import {HomePage}  from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
+import UserSearchPage from './pages/UserSearchPage';
 
 function App() {
   const [user, loading] = useAuthState(auth);
@@ -29,6 +30,10 @@ function App() {
           path="/Home" 
           // element={user ? <HomePage /> : <Navigate to="/login" />} 
           element={<HomePage/>}
+        />
+        <Route 
+          path="/search-users" 
+          element={user ? <UserSearchPage user={user}/> : <Navigate to="/login" />} 
         />
       </Routes>
     

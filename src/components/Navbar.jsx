@@ -29,15 +29,16 @@ const [profileImageUrl, setProfileImageUrl] = useState('');
 useEffect(()=>{
     if(!authUser) return;
     // console.log(JSON.stringify(authUser, null, 2))
+    const GetUserDetails = async ()=>{
+        const user = await getUserDetails(authUser?.uid);
+        // console.log('user details',JSON.stringify(user, null, 2));
+        setName(user.name);
+        setProfileImageUrl(user.profileImageUrl);
+    }
+
     GetUserDetails();
 },[authUser])
 
-const GetUserDetails = async ()=>{
-    const user = await getUserDetails(authUser?.uid);
-    // console.log('user details',JSON.stringify(user, null, 2));
-    setName(user.name);
-    setProfileImageUrl(user.profileImageUrl);
-}
 
 let navigate = useNavigate();
 
