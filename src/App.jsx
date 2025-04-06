@@ -1,8 +1,8 @@
-import './App.css'
+import './App.css';
 import { auth } from './firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import {HomePage}  from './pages/HomePage';
+import { HomePage } from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import UserSearchPage from './pages/UserSearchPage';
@@ -10,35 +10,35 @@ import UserSearchPage from './pages/UserSearchPage';
 function App() {
   const [user, loading] = useAuthState(auth);
 
-  // if(loading) return <div>Loading ...</div>
+  if (loading) return <div>Loading ...</div>; 
+
   return (
     <BrowserRouter>
       <Routes>
-      <Route 
+
+        <Route 
           path="/" 
           element={<HomePage user={user}/>}
         />
+
         <Route 
           path="/login" 
-          element={!user ? <LoginPage user={user}/> : <Navigate to="/" />} 
+          element={!user ? <LoginPage user={user} /> : <Navigate to="/" />} 
         />
+        
+
         <Route 
           path="/signup" 
-          element={!user ? <SignUpPage user={user}/> : <Navigate to="/" />} 
+          element={!user ? <SignUpPage user={user} /> : <Navigate to="/" />} 
         />
-        <Route 
-          path="/Home" 
-          // element={user ? <HomePage /> : <Navigate to="/login" />} 
-          element={<HomePage/>}
-        />
+        
         <Route 
           path="/search-users" 
           element={user ? <UserSearchPage user={user}/> : <Navigate to="/login" />} 
         />
       </Routes>
-    
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
