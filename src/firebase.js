@@ -15,6 +15,12 @@ appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 console.log("Firebase API Key:", import.meta.env.VITE_FIREBASE_API_KEY);
+console.log("Firebase auth domain:", import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
+console.log("projectId:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
+console.log("databaseURL:", import.meta.env.VITE_FIREBASE_DATABASE_URL );
+console.log("storageBucket", import.meta.env.VITE_FIREBASE_STORAGE_BUCKET);
+console.log("messagingSenderId", import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID);
+console.log("appId", import.meta.env.VITE_FIREBASE_APP_ID);
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
