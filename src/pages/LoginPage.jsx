@@ -1,6 +1,6 @@
 import React from "react";
 import WaveBackground from "../components/WaveBackground";
-import Navbar from "../components/NAvbar";
+import Navbar from "../components/Navbar";
 import { Box, Typography } from "@mui/material";
 import LoginForm from "../components/LoginForm";
 

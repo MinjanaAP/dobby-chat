@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vite build output
+dist/
+
+# Firebase Hosting files (optional if generated)
+firebase-debug.log
+.firebaserc
+.firebase/
+firebase.json
+firestore.indexes.json
+firestore.rules
+database.rules.json
+
+# Firebase functions (if using functions folder)
+functions/node_modules/

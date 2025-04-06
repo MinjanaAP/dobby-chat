@@ -1,6 +1,6 @@
 import SignUpForm from "../components/SignUpForm";
 import WaveBackground from "../components/WaveBackground";
-import Navbar from "../components/NAvbar";
+import Navbar from "../components/Navbar";
 import { Box, Typography } from "@mui/material";
 
 const SignUpPage = ({user})=>{
