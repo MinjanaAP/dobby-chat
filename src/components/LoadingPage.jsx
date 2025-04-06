@@ -33,7 +33,7 @@ return (
         
         <Box
             component="img"
-            src="/src/assets/images/logo.png"
+            src="https://res.cloudinary.com/dtv1nvsx9/image/upload/v1743941152/dobby-logo-enhanced_t5mdxk.png"
             alt="logo"
             sx={{
             position: "absolute",
