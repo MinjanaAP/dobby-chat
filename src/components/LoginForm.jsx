@@ -5,7 +5,8 @@ import LockOutlineIcon from '@mui/icons-material/LockOutline';
 import { CheckBox } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import ArrowRight from '@mui/icons-material/ArrowForward';
-import { signInWithGoogle, signInWithEmail } from "../firebase";
+import { signInWithGoogle, signInWithEmail, db } from "../firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 const LoginForm = ()=>{
     const [checked, setChecked] = useState(false);
@@ -32,9 +33,19 @@ const LoginForm = ()=>{
 
     const handleGoogleSignIn = async () =>{
         try {
-            await signInWithGoogle();
+            const user = await signInWithGoogle();
+
+            //? Save User Data in fireStore
+            await setDoc(doc(db, "users", user.uid),{
+                username: user.displayName,
+                email:user.email,
+                profileImageUrl: user.photoURL
+            })
+
+            console.log("Create user and saved data in db.");
         } catch (error) {
             setError(error.message);
+            console.error("Error in creating google user.", error);
         }   
     }
 

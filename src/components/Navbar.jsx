@@ -32,8 +32,8 @@ useEffect(()=>{
     const GetUserDetails = async ()=>{
         const user = await getUserDetails(authUser?.uid);
         // console.log('user details',JSON.stringify(user, null, 2));
-        setName(user.name);
-        setProfileImageUrl(user.profileImageUrl);
+        setName( user ? user.name : authUser.displayName);
+        setProfileImageUrl(user ? user.profileImageUrl : authUser.photoURL);
     }
 
     GetUserDetails();
@@ -212,7 +212,7 @@ return (
                 <>
                     <Tooltip title="Open settings">
                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar alt={authUser.email} src={profileImageUrl} />
+                        <Avatar alt={name} src={profileImageUrl} />
                     </IconButton>
                     </Tooltip>
                     <Menu

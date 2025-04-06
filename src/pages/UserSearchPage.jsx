@@ -1,6 +1,6 @@
 import { Box } from "@mui/material"
 import WaveBackground from "../components/WaveBackground";
-import Navbar from "../components/NAvbar";
+import Navbar from "../components/Navbar";
 import UserSearchSection from "../components/UserSearchSection";
 
 const UserSearchPage = ({user})=>{
@@ -9,7 +9,7 @@ const UserSearchPage = ({user})=>{
             <WaveBackground/>
             <Navbar authUser={user}/>
 
-            <UserSearchSection/>
+            <UserSearchSection currentUser={user}/>
         </Box>
     )
 }
