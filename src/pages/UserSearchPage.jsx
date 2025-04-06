@@ -9,7 +9,7 @@ const UserSearchPage = ({user})=>{
             <WaveBackground/>
             <Navbar authUser={user}/>
 
-            <UserSearchSection/>
+            <UserSearchSection currentUser={user}/>
         </Box>
     )
 }

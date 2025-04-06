@@ -2,8 +2,27 @@ import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material"
 import SearchIcon from '@mui/icons-material/Search';
 import UserCard from "./UserCard";
+import { useEffect, useState } from "react";
+import { getAllUsers } from "../services/userServices";
 
-const UserSearchSection = ()=>{
+const UserSearchSection = ({currentUser})=>{
+    const [users, setUsers] = useState([]);
+
+    
+    useEffect(()=>{
+        const GetAllUsers = async ()=>{
+            try {
+                const allUsers = await getAllUsers();
+                setUsers(allUsers);
+                // console.log(JSON.stringify(allUsers, null, 2));
+            } catch (error) {
+                console.error("Failed to fetch users:", error);
+            }
+        }
+
+        GetAllUsers();
+    },[]);
+
     return(
         <Box
             component='section'
@@ -59,9 +78,14 @@ const UserSearchSection = ()=>{
                         )
                     }}
                 />
+                {users
+                ?.filter((user) => user.id !== currentUser?.uid)
+                .map((user) => (
+                    <UserCard key={user.id} user={user}/>
+                ))}
+                {/* <UserCard/>
                 <UserCard/>
-                <UserCard/>
-                <UserCard/>
+                <UserCard/> */}
             </Box>
 
 

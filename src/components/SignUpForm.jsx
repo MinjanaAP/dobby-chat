@@ -78,7 +78,7 @@ const SignUpForm = ()=>{
 
             console.log('User created and data saved.');
         } catch (error) {
-            console.error("Registration error:", error);
+            console.error("Registration error:", error.message);
             setError(error.message);
         }
     }

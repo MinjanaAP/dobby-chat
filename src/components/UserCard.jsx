@@ -2,7 +2,7 @@ import { Avatar, Box, Card, Typography, IconButton } from "@mui/material"
 import ChatIcon from '@mui/icons-material/ChatBubbleOutline';
 
 
-const UserCard = () =>{
+const UserCard = ({user}) =>{
     const isOnline = true;
     return(
         <Card
@@ -26,8 +26,8 @@ const UserCard = () =>{
         >
             <Box position="relative" mr={2} >
                 <Avatar
-                    src="https://res.cloudinary.com/dtv1nvsx9/image/upload/v1743883106/zzkqyqn9avafc7egjmqi.jpg"
-                    alt="sanu"
+                    src= {user.profileImageUrl}
+                    alt= {user.username}
                     sx={{ width: 48, height: 48 }}
                 />
                 <Box
@@ -45,7 +45,7 @@ const UserCard = () =>{
                 </Box>
                 <Box flex={1}>
                     <Typography sx={{ color: "#fff", fontWeight: 500, textAlign:'start' }}>
-                    User Name
+                    {user.username}
                     </Typography>
                     <Typography sx={{ color: "gray", fontSize: "0.875rem", textAlign:'start' }}>
                     lastActive
