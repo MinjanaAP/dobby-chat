@@ -39,7 +39,7 @@ const UserSearchSection = ({currentUser})=>{
                 sx={{
                     width: "100%",
                     maxWidth: {
-                        xs: "70%",
+                        xs: "80%",
                         sm: "60%",
                         md: "50%",
                         lg: "40%",

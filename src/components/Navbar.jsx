@@ -196,7 +196,11 @@ return (
                     }}>
                         LogIn / SignUp
                     </Button>
-                    <Button variant="text" color="white" sx={{
+                    <Button variant="text" color="white"
+                    onClick={()=>{
+                        navigate('/login');
+                    }}
+                    sx={{
                         background: 'linear-gradient(90deg, #4F46E5, #9F7AEA)', 
                         borderRadius:'32px',
                         textTransform: 'none',

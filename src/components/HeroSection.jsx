@@ -29,7 +29,13 @@ return (
     <Box
         sx={{
         width: "100%",
-        maxWidth: "900px",
+        maxWidth: {
+            xs: "70%",
+            sm: "60%",
+            md: "50%",
+            lg: "40%",
+            xl: "40em",
+        },
         backdropFilter: "blur(10px)",
         background: "linear-gradient(to bottom right, rgba(26, 26, 63, 0.4), rgba(42, 42, 74, 0.3))",
         p: { xs: 4, md: 6 },
