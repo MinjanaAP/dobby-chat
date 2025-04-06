@@ -33,7 +33,7 @@ return (
         
         <Box
             component="img"
-            src="/src/assets/images/dobby-logo-enhanced.png"
+            src="/src/assets/images/logo.png"
             alt="logo"
             sx={{
             position: "absolute",
