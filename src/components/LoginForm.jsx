@@ -2,7 +2,7 @@ import { Box, Paper, Typography, Button, Divider, TextField, FormControlLabel, C
 import React, { useState } from "react";
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlineIcon from '@mui/icons-material/LockOutline';
-import { CheckBox } from "@mui/icons-material";
+import { CheckBox, Padding } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import ArrowRight from '@mui/icons-material/ArrowForward';
 import { signInWithGoogle, signInWithEmail, db } from "../firebase";
@@ -55,7 +55,13 @@ const LoginForm = ()=>{
         elevation={3}
         sx={{
             width:'100%',
-            maxWidth: 400,
+            maxWidth: {
+                xs: "80%",
+                sm: "60%",
+                md: "50%",
+                lg: "40%",
+                xl: "40em",
+            },
             p:4,
             borderRadius: 4,
             background: 'linear-gradient(to bottom right, rgba(26,26,63,0.4), rgba(42,42,74,0.3))',
@@ -173,7 +179,7 @@ const LoginForm = ()=>{
                     <Alert severity="error" variant="outlined" color=""><Typography variant="error" color="error">{error}</Typography></Alert>
                 )}
 
-                <Box display='flex' justifyContent='space-between' alignContent='center' >
+                <Box display='flex' justifyContent='space-between' alignItems='center' >
                     <FormControlLabel 
                         control={ <Checkbox sx={{ color: '#4f46e5' }} checked={checked} onChange={handleCheck} /> }
                         label={ <Typography color="gray" >Remember me</Typography> }

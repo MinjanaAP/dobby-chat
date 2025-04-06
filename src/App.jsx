@@ -6,11 +6,12 @@ import { HomePage } from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import UserSearchPage from './pages/UserSearchPage';
+import LoadingPage from './components/LoadingPage';
 
 function App() {
   const [user, loading] = useAuthState(auth);
 
-  if (loading) return <div>Loading ...</div>; 
+  if (loading) return <LoadingPage/>; 
 
   return (
     <BrowserRouter>

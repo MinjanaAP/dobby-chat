@@ -103,7 +103,13 @@ const SignUpForm = ()=>{
         elevation={3}
         sx={{
             width:'100%',
-            maxWidth: 400,
+            maxWidth: {
+                xs: "80%",
+                sm: "60%",
+                md: "50%",
+                lg: "40%",
+                xl: "40em",
+            },
             p:4,
             borderRadius: 4,
             background: 'linear-gradient(to bottom right, rgba(26,26,63,0.4), rgba(42,42,74,0.3))',
