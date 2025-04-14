@@ -12,7 +12,6 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
 import { useNavigate } from 'react-router-dom';
 import { getUserDetails } from '../services/userServices';
 
@@ -114,7 +113,21 @@ return (
             sx={{ display: { xs: 'block', md: 'none' } }}
             >
             {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page} onClick={handleCloseNavMenu} 
+                sx={{
+                    backgroundColor:"#0A0A1F", borderBottom:"1px solid", borderBottomColor:"#2A2A4A",color:'#FFFFFFAF',
+                    '&:hover':{
+                        color:'#FFFFFFFF',
+                        backgroundImage:
+                            "url('https://raw.githubusercontent.com/adrianhajdin/project_3D_developer_portfolio/main/src/assets/herobg.png')",
+                        backgroundRepeat: "repeat",
+                        
+                    },
+                    '&:hover::after': {
+                        backgroundColor:"#0A0A1F", 
+                },
+                }}
+                >
                 <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
                 </MenuItem>
             ))}
@@ -236,7 +249,21 @@ return (
                     onClose={handleCloseUserMenu}
                     >
                     {settings.map((setting) => (
-                        <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                        <MenuItem key={setting} onClick={handleCloseUserMenu}
+                        sx={{
+                            backgroundColor:"#0A0A1F", borderBottom:"1px solid", borderBottomColor:"#2A2A4A",color:'#FFFFFFAF',
+                            '&:hover':{
+                                color:'#FFFFFFFF',
+                                backgroundImage:
+                                    "url('https://raw.githubusercontent.com/adrianhajdin/project_3D_developer_portfolio/main/src/assets/herobg.png')",
+                                backgroundRepeat: "repeat",
+                                
+                            },
+                            '&:hover::after': {
+                                backgroundColor:"#0A0A1F", 
+                    },
+                        }}
+                        >
                         <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
                         </MenuItem>
                     ))}
