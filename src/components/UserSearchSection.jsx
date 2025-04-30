@@ -83,9 +83,6 @@ const UserSearchSection = ({currentUser})=>{
                 .map((user) => (
                     <UserCard key={user.id} user={user} authUser={currentUser}/>
                 ))}
-                {/* <UserCard/>
-                <UserCard/>
-                <UserCard/> */}
             </Box>
 
 
