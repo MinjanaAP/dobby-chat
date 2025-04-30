@@ -18,7 +18,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
 
-const pages = ['Home', 'Features', 'About'];
+const pages = ['Home','Chats', 'Features', 'About'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar({authUser}) {
@@ -125,7 +125,15 @@ return (
             sx={{ display: { xs: 'block', md: 'none' } }}
             >
             {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu} 
+                <MenuItem key={page} 
+                onClick={()=>{
+                    handleCloseNavMenu
+                    if(page === 'Home'){
+                        navigate('/')
+                    }else if (page === "Chats"){
+                        navigate('/conversations')
+                    }
+                }}
                 sx={{
                     backgroundColor:"#0A0A1F", borderBottom:"1px solid", borderBottomColor:"#2A2A4A",color:'#FFFFFFAF',
                     '&:hover':{
@@ -172,7 +180,11 @@ return (
             <Typography
                 key={page}
                 onClick={()=>{
-                    navigate(`/${page}`)
+                    if(page === 'Home'){
+                        navigate('/')
+                    }else if (page === "Chats"){
+                        navigate('/conversations')
+                    }
                 }}
                 sx={{ my: 3, color: '#F5F5F5C5', display: 'block', mx:2, px:1, textTransform:"none",
                     fontSize:'1.1em',

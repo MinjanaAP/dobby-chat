@@ -2,9 +2,26 @@ import { useTheme } from '@mui/material/styles';
 import { ArrowBackIosRounded } from '@mui/icons-material';
 import { Box, IconButton, useMediaQuery } from '@mui/material'
 import Typography from '@mui/material/Typography'
+import { ConversationList } from './ConversationList';
+import { useState } from 'react';
+import { ChatWindow } from './ChatWindow';
+import EmptyChat from './EmptyChat';
+
 export const ChatSection = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const [selectedConversation, setSelectedConversation] = useState(null);
+
+    const handleSelectedConversation = (conversation) => {
+        setSelectedConversation(conversation);
+        console.log("Selected Conversation Details :", conversation);
+    }
+
+    const handleBack = () => {
+        setSelectedConversation(null);
+        console.log("Selected conversation is null");
+    }
+    
     return (
         <Box
             component="section"
@@ -16,62 +33,89 @@ export const ChatSection = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 minHeight: "calc(100vh - 4rem)",
+                width: "100%",
                 py: 4,
             }}
         >
-            {/* //? back button for mobile */}
-            {isMobile && (
-                <IconButton
-                    onClick={onclose}
-                    sx={{
-                        position: 'fixed',
-                        top: 16,
-                        left: 16,
-                        zIndex: 50,
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        '&:hover': {
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        },
-                    }}
-                >
-                    <ArrowBackIosRounded/>
-                </IconButton>
-            )}
 
-            {/* //? Main Layout */}
             <Box
-                display="flex"
-                width="100%"
-                height="100%"
+                sx={{
+                    width: '100%',
+                    maxWidth: { lg: 1500 }, 
+                    margin: '0 auto',
+                }}
             >
-                {/* //* side bar */}
+
+                {/* Main Layout */}
                 <Box
-                    width={{ xs: '100%', md: 380, lg: 420 }}
+                    display="flex"
+                    width="100%"
                     height="100%"
-                    borderRight="1px solid #2a2a4a"
-                    sx={{
-                        backgroundColor: 'rgba(10,10,31,0.95)',
-                        backdropFilter: 'blur(12px)',
-                    }}
-                    >
-                    {/* <ConversationList /> */}
-                    <Typography variant="body1" color="initial">chat side bar</Typography>
+                >
+                    {isMobile ? (
+                        selectedConversation ? (
+                            <>
+                                <Box
+                                    flex={1}
+                                    sx={{
+                                        backgroundColor: 'rgba(10,10,31,0.008)',
+                                        backdropFilter: 'blur(12px)',
+                                    }}
+                                >
+                                    {selectedConversation && (
+                                        <ChatWindow conversation={selectedConversation} onBack={handleBack}/>
+                                    )}
+                                </Box>
+                            </>
+                        ):(
+                            <>
+                                <Box
+                                    width={{ xs: '100%', md: 380, lg: 420 }}
+                                    height="100%"
+                                    borderRight="1px solid #2a2a4a"
+                                    sx={{
+                                        backgroundColor: 'rgba(10,10,31,0.0095)',
+                                        backdropFilter: 'blur(12px)',
+                                    }}
+                                >
+                                    <ConversationList onSelectedConversation={handleSelectedConversation}/>
+                                    <Typography variant="body1" color="initial">chat side bar</Typography>
+                                </Box> 
+                            </>
+                        )
+                    ):(
+                        <>
+                            {/* Side bar */}
+                            <Box
+                                width={{ xs: '100%', md: 380, lg: 420 }}
+                                height="100%"
+                                borderRight="1px solid #2a2a4a"
+                                sx={{
+                                    backgroundColor: 'rgba(10,10,31,0.0095)',
+                                    backdropFilter: 'blur(12px)',
+                                }}
+                            >
+                                <ConversationList onSelectedConversation={handleSelectedConversation}/>
+                                <Typography variant="body1" color="initial">chat side bar</Typography>
+                            </Box>
+                             {/* Chat window */}
+                            <Box
+                                flex={1}
+                                sx={{
+                                    backgroundColor: 'rgba(10,10,31,0.008)',
+                                    backdropFilter: 'blur(12px)',
+                                }}
+                            >
+                                {selectedConversation ? (
+                                    <ChatWindow conversation={selectedConversation} onBack={handleBack} />
+                                ) : (
+                                    <EmptyChat/>
+                                )}
+                            </Box>
+                        </>
+                    )}
                 </Box>
-
-                {/* //* chat window */}
-                {!isMobile && (
-                    <Box
-                        flex={1}
-                        sx={{
-                            backgroundColor: 'rgba(10,10,31,0.8)',
-                            backdropFilter: 'blur(12px)',
-                        }}
-                    >
-                        <Typography variant="body1" color="initial">chat window</Typography>
-                    </Box>
-                )}
             </Box>
-
         </Box>
     )
 }
