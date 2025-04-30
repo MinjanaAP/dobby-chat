@@ -1,6 +1,6 @@
 import { Box } from "@mui/material"
 import WaveBackground from "../components/WaveBackground"
-import Navbar from "../components/NAvbar"
+import Navbar from "../components/Navbar"
 import { ChatSection } from "../components/ChatPageComponents/ChatSection"
 
 export const ChatPage = ({user}) => {
