@@ -14,6 +14,8 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
 import { getUserDetails } from '../services/userServices';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
 
 
 const pages = ['Home', 'Features', 'About'];
@@ -54,7 +56,17 @@ const handleCloseNavMenu = () => {
 
 const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+    
 };
+
+const handleClick = (setting) => {
+    console.log("settings", setting);
+}
+
+const handleLogout = async () => {
+    signOut(auth);
+    console.log("Logout successful.");
+}
 
 
 return (
@@ -249,7 +261,16 @@ return (
                     onClose={handleCloseUserMenu}
                     >
                     {settings.map((setting) => (
-                        <MenuItem key={setting} onClick={handleCloseUserMenu}
+                        <MenuItem 
+                        key={setting} 
+                        onClick={() => {
+                            handleCloseUserMenu();
+                            if (setting === "Logout") {
+                                handleLogout();
+                            } else {
+                                handleClick(setting);
+                            }
+                        }}
                         sx={{
                             backgroundColor:"#0A0A1F", borderBottom:"1px solid", borderBottomColor:"#2A2A4A",color:'#FFFFFFAF',
                             '&:hover':{
@@ -264,7 +285,7 @@ return (
                     },
                         }}
                         >
-                        <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+                        <Typography sx={{ textAlign: 'center' }} onClick={handleClick} >{setting}</Typography>
                         </MenuItem>
                     ))}
                     </Menu>
