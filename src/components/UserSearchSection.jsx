@@ -81,7 +81,7 @@ const UserSearchSection = ({currentUser})=>{
                 {users
                 ?.filter((user) => user.id !== currentUser?.uid)
                 .map((user) => (
-                    <UserCard key={user.id} user={user}/>
+                    <UserCard key={user.id} user={user} authUser={currentUser}/>
                 ))}
                 {/* <UserCard/>
                 <UserCard/>

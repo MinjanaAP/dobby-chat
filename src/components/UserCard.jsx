@@ -1,9 +1,32 @@
 import { Avatar, Box, Card, Typography, IconButton } from "@mui/material"
 import ChatIcon from '@mui/icons-material/ChatBubbleOutline';
+import { createConversation } from "../api/firebase.service";
+import { useState } from "react";
+import { getUserDetails } from "../services/userServices";
 
 
-const UserCard = ({user}) =>{
+const UserCard = ({user, authUser}) =>{
     const isOnline = true;
+    const [conversationId, setConversationId] = useState(null);
+
+    const createNewConversation = async () => {
+        const getUser = await getUserDetails(authUser?.uid);
+        console.log("logged user get details : ", JSON.stringify(getUser,null,2));
+        console.log("logged user : ", JSON.stringify(authUser,null,2));
+        console.log("Other user : ", JSON.stringify(user,null,2));
+        try {
+            const newConversationId = await createConversation(authUser.uid, getUser, user);
+            if (newConversationId) {
+                setConversationId(newConversationId);
+                console.log("Conversation Id : ", newConversationId);
+            }else{
+                console.error("Error in creating conversation.");
+            }
+        } catch (error) {
+            console.error("Error in creating conversation.", error);
+        }
+    }
+
     return(
         <Card
         sx={{
@@ -67,6 +90,7 @@ const UserCard = ({user}) =>{
                         transition: "color 0.3s",
                         "&:hover": { color: "#4f46e5" },
                     }}
+                    onClick={createNewConversation}
                     />
                 </IconButton>
 
