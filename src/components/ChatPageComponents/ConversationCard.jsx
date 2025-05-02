@@ -47,7 +47,7 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
 
     return (
         <Box
-            onClick={() => onClick(receiver)}
+            onClick={() => onClick(conversation)}
             position="relative"
             width="100%"
             px={2}
