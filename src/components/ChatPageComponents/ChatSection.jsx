@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { ChatWindow } from './ChatWindow';
 import EmptyChat from './EmptyChat';
 
-export const ChatSection = () => {
+export const ChatSection = ({ authUser }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [selectedConversation, setSelectedConversation] = useState(null);
@@ -63,7 +63,7 @@ export const ChatSection = () => {
                                     }}
                                 >
                                     {selectedConversation && (
-                                        <ChatWindow conversation={selectedConversation} onBack={handleBack}/>
+                                        <ChatWindow conversation={selectedConversation} onBack={handleBack} authUser={authUser}/>
                                     )}
                                 </Box>
                             </>
@@ -78,7 +78,7 @@ export const ChatSection = () => {
                                         backdropFilter: 'blur(12px)',
                                     }}
                                 >
-                                    <ConversationList onSelectedConversation={handleSelectedConversation}/>
+                                    <ConversationList onSelectedConversation={handleSelectedConversation} authUser={authUser}/>
                                     <Typography variant="body1" color="initial">chat side bar</Typography>
                                 </Box> 
                             </>
@@ -95,7 +95,7 @@ export const ChatSection = () => {
                                     backdropFilter: 'blur(12px)',
                                 }}
                             >
-                                <ConversationList onSelectedConversation={handleSelectedConversation}/>
+                                <ConversationList onSelectedConversation={handleSelectedConversation} authUser={authUser}/>
                                 <Typography variant="body1" color="initial">chat side bar</Typography>
                             </Box>
                              {/* Chat window */}
@@ -107,7 +107,7 @@ export const ChatSection = () => {
                                 }}
                             >
                                 {selectedConversation ? (
-                                    <ChatWindow conversation={selectedConversation} onBack={handleBack} />
+                                    <ChatWindow conversation={selectedConversation} onBack={handleBack} authUser={authUser}/>
                                 ) : (
                                     <EmptyChat/>
                                 )}

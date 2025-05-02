@@ -10,7 +10,7 @@ export const ChatPage = ({user}) => {
             <WaveBackground/>
             <Navbar authUser={user}/>
 
-            <ChatSection/>
+            <ChatSection authUser={user} />
         </Box>
     )
 }
