@@ -2,8 +2,10 @@ import { ArrowBackIosNewRounded } from "@mui/icons-material";
 import { Avatar, Box, Typography, IconButton } from "@mui/material";
 import { Star, Pin } from 'lucide-react';
 import { PinnedMessages } from "./PinnedMessages";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Message } from "./Message";
+import { TypingIndicator } from "./TypingIndicator";
+import { ChatInput } from "./ChatInput";
 
 const MOCK_MESSAGES = [
     {
@@ -45,7 +47,41 @@ const MOCK_MESSAGES = [
   
 
 export const ChatWindow = ({ conversation, onBack, authUser }) => {
+    const {
+        senderDetails,
+        receiverDetails,
+        typingStatus,
+    } = conversation;
+
     const [pinnedClose, setPinnedClose] = useState(false);
+    const [receiver, setReceiver] = useState({
+        id:"",
+        name:"",
+        profileImage:"",
+        typing:""
+    });
+
+    useEffect(() => {
+            if (!conversation) return;
+            // console.error("authUser", JSON.stringify(authUser, null, 2));
+        
+            if (senderDetails.id === authUser.uid) {
+                setReceiver({
+                    id: receiverDetails.id,
+                    name: receiverDetails.name,
+                    profileImage: receiverDetails.profileImg,
+                    typing: typingStatus[receiverDetails.id]
+                });
+            } else {
+                setReceiver({
+                    id: senderDetails.id,
+                    name: senderDetails.name,
+                    profileImage: senderDetails.profileImg,
+                    typing: typingStatus[senderDetails.id]
+                });
+            }
+            
+        }, [conversation, authUser]);
 
     const closePinnedMessages = () => {
         setPinnedClose(true);
@@ -82,8 +118,8 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                     </IconButton>
                     
                     <Avatar 
-                        src={conversation.profileImage} 
-                        alt={conversation.name} 
+                        src={receiver.profileImage} 
+                        alt={receiver.name} 
                         sx={{ 
                             width: 40, 
                             height: 40,
@@ -93,9 +129,9 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                     
                     <Box justifyContent="start" >
                         <Typography fontWeight={500} color="white">
-                            {conversation.name}
+                            {receiver.name}
                         </Typography>
-                        { conversation.typing ? (
+                        { receiver.typing ? (
                             <Typography
                                 variant="body2"
                                 sx={{
@@ -145,11 +181,15 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                 <PinnedMessages handleClose={closePinnedMessages} />
             ) }
 
-            <Box sx={{ flex:1, overflowY:'auto', padding: 2 }} >
+            <Box sx={{ flex:.8, overflowY:'auto', padding: 2 }} >
                 {MOCK_MESSAGES.map((message) => (
                     <Message key={message.id} message={message} authUser={authUser}/>
                 ))}
+                {!receiver.typing && (
+                    <TypingIndicator/>
+                )}
             </Box>
+            <ChatInput conversation={conversation} authUser={authUser} />
         </Box>
     )
 }

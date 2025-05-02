@@ -79,7 +79,6 @@ export const ChatSection = ({ authUser }) => {
                                     }}
                                 >
                                     <ConversationList onSelectedConversation={handleSelectedConversation} authUser={authUser}/>
-                                    <Typography variant="body1" color="initial">chat side bar</Typography>
                                 </Box> 
                             </>
                         )

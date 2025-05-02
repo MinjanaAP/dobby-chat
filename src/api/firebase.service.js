@@ -1,6 +1,6 @@
-import { addDoc, collection, getDocs, query, serverTimestamp, where } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore"
 import { db } from "../firebase"
-import { id } from "date-fns/locale";
+
 
 /**
  * * create or return an existing conversation id between users
@@ -70,6 +70,40 @@ export const getLoggedUsersConversations = async (authUserId) => {
         }));
     } catch (error) {
         console.error("Error getting conversations:", error);
+        return error;
+    }
+}
+
+export const sendMessages = async (message, conversationId, userId) => {
+    try {
+        const messageRef = collection(db, "conversations", conversationId, "messages");
+
+        await addDoc(messageRef, {
+            senderId: userId,
+            content:message,
+            timestamp: serverTimestamp()
+        });
+
+        //? Update last message in conversation
+        const conversationRef = doc(db, "conversations", conversationId);
+        const conversationSnap = await getDoc(conversationRef);
+
+        const unreadCount = conversationSnap.exists() ? (conversationSnap.data().unreadCount || 0) + 1: 1;
+
+        await setDoc(conversationRef, {
+            lastMessage: message,
+            unreadCount,
+            lastMessageSenderId: userId
+        },{ merge: true });
+
+        const response = {
+            status: true,
+            messageId: conversationId
+        }
+
+        return response;
+    } catch (error) {
+        console.error("Error sending messages : ", error);
         return error;
     }
 }
