@@ -1,5 +1,6 @@
 import { addDoc, collection, getDocs, query, serverTimestamp, where } from "firebase/firestore"
 import { db } from "../firebase"
+import { id } from "date-fns/locale";
 
 /**
  * * create or return an existing conversation id between users
@@ -36,6 +37,11 @@ export const createConversation = async (authUserId, loggedUser, otherUser) => {
                 lastMessage: "",
                 unreadCount: 0,
                 lastMessageSenderId : "",
+                pinned: false,
+                typingStatus: {
+                    [authUserId]: false,
+                    [otherUser.id]: false
+                },
                 timestamp : serverTimestamp(),
             });
 
@@ -47,4 +53,23 @@ export const createConversation = async (authUserId, loggedUser, otherUser) => {
     } catch (error) {
         return error;
     }    
+}
+
+export const getLoggedUsersConversations = async (authUserId) => {
+    try {
+        const q = query(collection(db, "conversations"), where("participants", "array-contains", authUserId));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+            return [];
+        }
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error("Error getting conversations:", error);
+        return error;
+    }
 }

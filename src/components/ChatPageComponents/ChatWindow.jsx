@@ -1,8 +1,55 @@
 import { ArrowBackIosNewRounded } from "@mui/icons-material";
 import { Avatar, Box, Typography, IconButton } from "@mui/material";
 import { Star, Pin } from 'lucide-react';
+import { PinnedMessages } from "./PinnedMessages";
+import { useState } from "react";
+import { Message } from "./Message";
 
-export const ChatWindow = ({ conversation, onBack }) => {
+const MOCK_MESSAGES = [
+    {
+    id: 1,
+    content: "Hey! How's the project going?",
+    timestamp: '12:30 PM',
+    senderId: 'glUi6harqPWDNsT4jyUiY3Z0UXA3', 
+    status: 'read',
+    },
+    {
+    id: 2,
+    content: "It's coming along great! I've just finished the main features.",
+    timestamp: '12:31 PM',
+    senderId: 'JEs0f3YT0yePpIQT65H7ZEv7u6E2', 
+    status: 'read',
+    },
+    {
+    id: 3,
+    content: "That's awesome! Can you show me a demo tomorrow?",
+    timestamp: '12:32 PM',
+    senderId: 'glUi6harqPWDNsT4jyUiY3Z0UXA3', 
+    status: 'read',
+    },
+    {
+    id: 4,
+    content: "Sure thing! I'll prepare it tonight.",
+    timestamp: '12:33 PM',
+    senderId: 'JEs0f3YT0yePpIQT65H7ZEv7u6E2', 
+    status: 'read',
+    },
+    {
+    id: 5,
+    content: "Great, looking forward to it!",
+    timestamp: '12:34 PM',
+    senderId: 'glUi6harqPWDNsT4jyUiY3Z0UXA3', 
+    status: 'read',
+    },
+];
+  
+
+export const ChatWindow = ({ conversation, onBack, authUser }) => {
+    const [pinnedClose, setPinnedClose] = useState(false);
+
+    const closePinnedMessages = () => {
+        setPinnedClose(true);
+    }
     return (
         <Box display="flex" flexDirection="column" height="100vh">
             {/* Chat header */}
@@ -35,7 +82,7 @@ export const ChatWindow = ({ conversation, onBack }) => {
                     </IconButton>
                     
                     <Avatar 
-                        src={conversation.avatar} 
+                        src={conversation.profileImage} 
                         alt={conversation.name} 
                         sx={{ 
                             width: 40, 
@@ -44,13 +91,29 @@ export const ChatWindow = ({ conversation, onBack }) => {
                         }} 
                     />
                     
-                    <Box>
+                    <Box justifyContent="start" >
                         <Typography fontWeight={500} color="white">
                             {conversation.name}
                         </Typography>
-                        <Typography variant="body2" color="gray">
-                            {conversation.online ? 'Online' : 'Offline'}
-                        </Typography>
+                        { conversation.typing ? (
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: '#4f46e5',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                }}
+                            >
+                                typing...
+                            </Typography>
+                        ):(
+                            <Typography variant="body2" color="gray" sx={{ textAlign:"start" }}>
+                                {conversation.online ? 'Online' : 'Offline'}
+                            </Typography>
+                        )}
+                        
+                        
                     </Box>
                 </Box>
 
@@ -77,7 +140,16 @@ export const ChatWindow = ({ conversation, onBack }) => {
                 </Box>
             </Box>
 
-            {/* Rest of your chat window content would go here */}
+            {/* //? Pinned messages */}
+            {!pinnedClose && (
+                <PinnedMessages handleClose={closePinnedMessages} />
+            ) }
+
+            <Box sx={{ flex:1, overflowY:'auto', padding: 2 }} >
+                {MOCK_MESSAGES.map((message) => (
+                    <Message key={message.id} message={message} authUser={authUser}/>
+                ))}
+            </Box>
         </Box>
     )
 }

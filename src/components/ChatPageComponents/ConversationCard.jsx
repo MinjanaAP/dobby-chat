@@ -1,21 +1,53 @@
 import { Avatar, Typography, Box } from "@mui/material";
 import { CheckCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export const ConversationCard = ({ conversation, onClick }) => {
+export const ConversationCard = ({ conversation, onClick, authUser }) => {
+
     const {
-        name,
-        profileImage,
+        senderDetails,
+        receiverDetails,
         lastMessage,
         timestamp,
-        unread,
-        online,
-        typing,
+        unreadCount,
+        typingStatus,
         pinned
     } = conversation;
 
+    const [online, setOnline]  = useState(false);
+
+    const [receiver, setReceiver] = useState({
+        id:"",
+        name:"",
+        profileImage:"",
+        typing:""
+    });
+
+    useEffect(() => {
+        if (!conversation) return;
+        // console.error("authUser", JSON.stringify(authUser, null, 2));
+    
+        if (senderDetails.id === authUser.uid) {
+            setReceiver({
+                id: receiverDetails.id,
+                name: receiverDetails.name,
+                profileImage: receiverDetails.profileImg,
+                typing: typingStatus[receiverDetails.id]
+            });
+        } else {
+            setReceiver({
+                id: senderDetails.id,
+                name: senderDetails.name,
+                profileImage: senderDetails.profileImg,
+                typing: typingStatus[senderDetails.id]
+            });
+        }
+        
+    }, [conversation, authUser]);
+
     return (
         <Box
-            onClick={() => onClick(conversation)}
+            onClick={() => onClick(receiver)}
             position="relative"
             width="100%"
             px={2}
@@ -45,7 +77,7 @@ export const ConversationCard = ({ conversation, onClick }) => {
             {/* Layout */}
             <Box display="flex" alignContent="center" gap={2} >
                 <Box position="relative">
-                    <Avatar src={profileImage} alt={name} sx={{ width: 48, height: 48 }} />
+                    <Avatar src={receiver.profileImage} alt={receiver.name} sx={{ width: 48, height: 48 }} />
                     {online && (
                         <Box
                             position="absolute"
@@ -64,36 +96,36 @@ export const ConversationCard = ({ conversation, onClick }) => {
                 <Box flex={1} minWidth={0} >
                     <Box display="flex" justifyContent="space-between" alignContent="center" mb={0.5} >
                         <Typography fontWeight={500} noWrap color="white">
-                            {name}
+                            {receiver.name}
                         </Typography>
                         <Typography
                             variant="caption"
                             sx={{ color: 'gray', marginLeft: 1, whiteSpace: 'nowrap' }}
                         >
-                            {timestamp}
+                            {new Date(timestamp.seconds * 1000).toLocaleTimeString()}
                         </Typography>
                     </Box>
 
                     <Box display="flex" alignItems="center" gap={0.5}>
-                        {!typing && (
+                        {unreadCount === 0 && (
                             <CheckCheck size={16} color="#4f46e5" style={{ flexShrink: 0 }} />
                         )}
                         <Typography
                             variant="body2"
                             sx={{
-                                color: typing ? '#4f46e5' : 'gray',
+                                color: typingStatus[receiver.id] ? '#4f46e5' : 'gray',
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                             }}
                         >
-                            {typing ? 'typing...' : lastMessage}
+                            {typingStatus[receiver.id] ? 'typing...' : lastMessage}
                         </Typography>
                     </Box>
                 </Box>
 
                 {/* Unread badge */}
-                {unread > 0 && (
+                {unreadCount > 0 && (
                 <Box
                     minWidth={20}
                     height={20}
@@ -106,7 +138,7 @@ export const ConversationCard = ({ conversation, onClick }) => {
                     alignItems="center"
                     justifyContent="center"
                 >
-                    {unread}
+                    {unreadCount}
                 </Box>
                 )}
             </Box>
