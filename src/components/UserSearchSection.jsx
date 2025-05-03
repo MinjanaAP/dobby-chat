@@ -4,19 +4,24 @@ import SearchIcon from '@mui/icons-material/Search';
 import UserCard from "./UserCard";
 import { useEffect, useState } from "react";
 import { getAllUsers } from "../services/userServices";
+import ConversationCardSkeleton from "./Skeleton/ConversationCardSkeleton";
 
 const UserSearchSection = ({currentUser})=>{
     const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     
     useEffect(()=>{
         const GetAllUsers = async ()=>{
             try {
+                setLoading(true);
                 const allUsers = await getAllUsers();
                 setUsers(allUsers);
+                setLoading(false);
                 // console.log(JSON.stringify(allUsers, null, 2));
             } catch (error) {
                 console.error("Failed to fetch users:", error);
+                setLoading(false);
             }
         }
 
@@ -78,11 +83,15 @@ const UserSearchSection = ({currentUser})=>{
                         )
                     }}
                 />
-                {users
-                ?.filter((user) => user.id !== currentUser?.uid)
-                .map((user) => (
-                    <UserCard key={user.id} user={user} authUser={currentUser}/>
-                ))}
+                <Box flex={1} overflow="auto" maxHeight="75vh">
+                    {!loading ? (
+                        users?.filter((user) => user.id !== currentUser?.uid).map((user) => (       
+                                <UserCard key={user.id} user={user} authUser={currentUser}/>
+                        ))
+                    ):(
+                        <ConversationCardSkeleton count={10} />
+                    )}
+                </Box>
             </Box>
 
 
