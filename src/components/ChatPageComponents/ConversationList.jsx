@@ -1,32 +1,48 @@
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputBase, List, ListItem, Paper } from "@mui/material";
+import { Box, InputBase, List, ListItem, Paper, Button, Typography, useMediaQuery } from "@mui/material";
 import { ConversationCard } from "./ConversationCard";
 import { useEffect, useState } from "react";
 import { getLoggedUsersConversations } from "../../api/firebase.service";
+import { useNavigate } from "react-router-dom";
+import ConversationCardSkeleton from "../Skeleton/ConversationCardSkeleton";
+import EmptyConversationList from "./EmptyConversationList";
+import { useTheme } from '@mui/material/styles';
+import { MessageSquarePlus } from "lucide-react";
 
 
 export const ConversationList = ({ onSelectedConversation, authUser }) => {
 
     const [conversations, setConversations] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         if(!authUser) return;
 
         const getConversation = async () =>{
             try {
+                setLoading(true);
                 const conversations = await getLoggedUsersConversations(authUser.uid);
                 console.log("conversations", JSON.stringify(conversations, null,2));
                 if(!conversations){
                     console.error("Error in getting conversations.");
                 }
                 setConversations(conversations);
+                setLoading(false);
             } catch (error) {
                 console.error(error);
+                setLoading(false);
             }
         }
 
         getConversation();
     },[authUser]);
+
+    const handleNavigate = () => {
+        navigate('/search-users');
+    }
 
     return (
         <Box
@@ -62,19 +78,50 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
                         }}
                     />
                 </Paper>
+                <Button
+                    onClick={handleNavigate}
+                    startIcon={<MessageSquarePlus size={20} />}
+                    sx={{
+                        px: 4,
+                        py: 1.5,
+                        mt: 2,
+                        width: '100%',
+                        borderRadius: 2,
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        background: 'linear-gradient(to right, #4f46e5, #9f7aea)',
+                        color: '#FFFFFFAF',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                        '&:hover': {
+                        transform: 'scale(1.05)',
+                        boxShadow: '0 0 20px rgba(79, 70, 229, 0.5)',
+                        },
+                    }}
+                    >
+                    {isMobile ? 'Add conversation' : 'Create New Conversation'}
+                </Button>
             </Box>
 
             {/* Conversation Items */}
             <Box flex={1} overflow="auto" >
-                <List disablePadding>
-                    {conversations.map((conversation) => (
-                        <ListItem key={conversation.id} disableGutters >
-                            <ConversationCard conversation={conversation} onClick={onSelectedConversation} authUser={authUser}/>
-                        </ListItem>
-                    ))}
-                </List>
+                {!loading ? (
+                    conversations.length === 0 ? (
+                        <EmptyConversationList/>
+                    ):(
+                        <List disablePadding>
+                            {conversations.map((conversation) => (
+                                <ListItem key={conversation.id} disableGutters >
+                                    <ConversationCard conversation={conversation} onClick={onSelectedConversation} authUser={authUser}/>
+                                </ListItem>
+                            ))}
+                        </List>
+                    )
+                ) : (
+                    <ConversationCardSkeleton count={6} />
+                )}
             </Box>
-
         </Box>
     )
 }

@@ -3,11 +3,13 @@ import ChatIcon from '@mui/icons-material/ChatBubbleOutline';
 import { createConversation } from "../api/firebase.service";
 import { useState } from "react";
 import { getUserDetails } from "../services/userServices";
+import { useNavigate } from "react-router-dom";
 
 
 const UserCard = ({user, authUser}) =>{
     const isOnline = true;
     const [conversationId, setConversationId] = useState(null);
+    const navigate = useNavigate();
 
     const createNewConversation = async () => {
         const getUser = await getUserDetails(authUser?.uid);
@@ -19,6 +21,7 @@ const UserCard = ({user, authUser}) =>{
             if (newConversationId) {
                 setConversationId(newConversationId);
                 console.log("Conversation Id : ", newConversationId);
+                navigate('/conversations');
             }else{
                 console.error("Error in creating conversation.");
             }

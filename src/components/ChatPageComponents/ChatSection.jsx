@@ -34,7 +34,13 @@ export const ChatSection = ({ authUser }) => {
                 justifyContent: "center",
                 minHeight: "calc(100vh - 4rem)",
                 width: "100%",
-                py: 4,
+                
+                py: {
+                    xs: 1,
+                    sm: 1,
+                    md: 1,
+                    lg: 4,
+                },
             }}
         >
 
