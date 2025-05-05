@@ -73,8 +73,7 @@ return (
     <AppBar position="static" sx={{ backgroundColor:"#0A0A1F", borderBottom:"1px solid", borderBottomColor:"#2A2A4A" }}>
     <Container maxWidth="xl">
         <Toolbar disableGutters>
-        {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} >
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} onClick={()=> { navigate('/') }}>
             <img src="https://res.cloudinary.com/dtv1nvsx9/image/upload/v1743941152/dobby-logo-enhanced_t5mdxk.png" alt="dobby-logo" width='40px' />
         </Box>
         
@@ -91,6 +90,9 @@ return (
             letterSpacing: '.3rem',
             color: 'inherit',
             textDecoration: 'none',
+            }}
+            onClick={()=> {
+                navigate('/')
             }}
         >
             Dobby
@@ -154,7 +156,7 @@ return (
             </Menu>
         </Box>
         {/* <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} /> */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }}>
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} onClick={()=> { navigate('/') }} >
             <img src="https://res.cloudinary.com/dtv1nvsx9/image/upload/v1743941152/dobby-logo-enhanced_t5mdxk.png" alt="dobby-logo" width='40px' />
         </Box>
         <Typography
@@ -171,6 +173,9 @@ return (
             color: 'inherit',
             textDecoration: 'none',
             fontSize: '1.3em'
+            }}
+            onClick={()=>{
+                navigate('/')
             }}
         >
             Dobby
