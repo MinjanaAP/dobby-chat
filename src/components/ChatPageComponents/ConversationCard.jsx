@@ -138,7 +138,7 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
                     </Box>
 
                     <Box display="flex" alignItems="center" gap={0.5}>
-                        {(unreadCount === 0 && !otherUserTyping )&& (
+                        {(unreadCount === 0 && !otherUserTyping && lastMessage )&& (
                             <CheckCheck size={16} color="#4f46e5" style={{ flexShrink: 0 }} />
                         )}
                         <Typography
@@ -152,6 +152,16 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
                         >
                             {otherUserTyping? 'typing...' : lastMessage}
                         </Typography>
+                        {!lastMessage && (
+                            <Typography variant="body2" 
+                                sx={{
+                                    color: 'gray',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                }}
+                            >💬 No messages yet. Say hi 👋 to begin the chat.</Typography>
+                        )}
                     </Box>
                 </Box>
 

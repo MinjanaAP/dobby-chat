@@ -180,3 +180,25 @@ export const updateTypingStatus = async (conversationId, userId, isTyping) => {
         console.error("Error updating typing status:", error);
     }
 }
+
+/**
+ * * Save FCM Token to user docs
+ * @param {{ userId:string, token: string }}
+ */
+export const saveFCMTokenToUser = async (userId, token) => {
+    try {
+        const userDocRef = doc(db, 'users', userId);
+        const userDocSnapshot = await getDoc(userDocRef);
+
+        if(userDocSnapshot.exists()){
+            await updateDoc(userDocRef, {
+                fcmToken: token
+            });
+            console.log('FCM Token saved successfully.');
+        }else{
+            console.error('User document not found.');
+        }
+    } catch (error) {
+        console.error('Error saving FCM Token:', error);
+    }
+}

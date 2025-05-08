@@ -2,51 +2,13 @@ import { ArrowBackIosNewRounded } from "@mui/icons-material";
 import { Avatar, Box, Typography, IconButton } from "@mui/material";
 import { Star, Pin } from 'lucide-react';
 import { PinnedMessages } from "./PinnedMessages";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
 import { ChatInput } from "./ChatInput";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
-
-const MOCK_MESSAGES = [
-    {
-    id: 1,
-    content: "Hey! How's the project going?",
-    timestamp: '12:30 PM',
-    senderId: 'glUi6harqPWDNsT4jyUiY3Z0UXA3', 
-    status: 'read',
-    },
-    {
-    id: 2,
-    content: "It's coming along great! I've just finished the main features.",
-    timestamp: '12:31 PM',
-    senderId: 'JEs0f3YT0yePpIQT65H7ZEv7u6E2', 
-    status: 'read',
-    },
-    {
-    id: 3,
-    content: "That's awesome! Can you show me a demo tomorrow?",
-    timestamp: '12:32 PM',
-    senderId: 'glUi6harqPWDNsT4jyUiY3Z0UXA3', 
-    status: 'read',
-    },
-    {
-    id: 4,
-    content: "Sure thing! I'll prepare it tonight.",
-    timestamp: '12:33 PM',
-    senderId: 'JEs0f3YT0yePpIQT65H7ZEv7u6E2', 
-    status: 'read',
-    },
-    {
-    id: 5,
-    content: "Great, looking forward to it!",
-    timestamp: '12:34 PM',
-    senderId: 'glUi6harqPWDNsT4jyUiY3Z0UXA3', 
-    status: 'read',
-    },
-];
-  
+import EmptyConversation from "./EmptyConversation";
 
 export const ChatWindow = ({ conversation, onBack, authUser }) => {
     const {
@@ -63,6 +25,13 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
     });
     const [messages, setMessages] = useState([]);
     const [typingStatus, setTypingStatus] = useState({});
+    const boxRef = useRef(null);
+
+    useEffect(() => {
+        if (boxRef.current) {
+            boxRef.current.scrollTop = boxRef.current.scrollHeight;
+        }
+    },[messages]);
 
     useEffect(() => {
             if (!conversation) return;
@@ -220,13 +189,20 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                 <PinnedMessages handleClose={closePinnedMessages} />
             ) }
 
-            <Box sx={{ flex:.8, overflowY:'auto', padding: 2 }} >
-                {messages.map((message) => (
-                    <Message key={message.id} message={message} authUser={authUser}/>
-                ))}
-                {otherUserTyping && (
-                    <TypingIndicator receiver={receiver?.name}/>
+            <Box sx={{ flex:.8, overflowY:'auto', padding: 2 }} ref={boxRef}>
+                {messages.length === 0 ? ( 
+                    <EmptyConversation />
+                ):(
+                    <>
+                        {messages.map((message) => (
+                        <Message key={message.id} message={message} authUser={authUser}/>
+                        ))}
+                        {otherUserTyping && (
+                            <TypingIndicator receiver={receiver?.name}/>
+                        )}
+                    </>
                 )}
+                
             </Box>
             <ChatInput conversation={conversation} authUser={authUser} />
         </Box>

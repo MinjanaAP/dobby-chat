@@ -9,9 +9,9 @@ import _ from "lodash";
 export const ChatInput = ({conversation, authUser}) => {
     const [message, setMessage] = useState('');
     const typingTimeoutRef = useRef(null);
-
+    const isDesktop = window.innerWidth > 768;
+    
     const handleKeyDown = (e) => {
-        const isDesktop = window.innerWidth > 768;
         if(e.key === 'Enter' && !e.shiftKey && isDesktop){
             handleSend();
         }
@@ -61,9 +61,11 @@ export const ChatInput = ({conversation, authUser}) => {
             }}  
         >
             <Box sx={{ display: 'flex', alignItems:'center', gap:1.5 }} >
-                <IconButton sx={{ color:"gray" }}>
-                    <InsertEmoticonOutlined/>
-                </IconButton>
+                {isDesktop && (
+                    <IconButton sx={{ color:"gray" }}>
+                        <InsertEmoticonOutlined/>
+                    </IconButton>
+                )}
                 <IconButton sx={{ color:"gray" }} >
                     <AttachFileOutlined/>
                 </IconButton>

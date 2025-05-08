@@ -37,3 +37,5 @@ database.rules.json
 
 # Firebase functions (if using functions folder)
 functions/node_modules/
+
+

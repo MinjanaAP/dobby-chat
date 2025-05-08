@@ -3,6 +3,7 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPasswor
 import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 import { getStorage } from 'firebase/storage';
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
 apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -28,6 +29,11 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 // export const rtdb = getDatabase();
 export const googleProvider = new GoogleAuthProvider();
+const messaging = getMessaging(app);
+export { messaging, getToken, onMessage };
+
+
+
 
 // Auth functions
 export const signInWithGoogle = async () => {

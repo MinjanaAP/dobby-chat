@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUserDetails } from '../services/userServices';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
+import { saveFCMTokenToUser } from '../api/firebase.service';
 
 
 const pages = ['Home','Chats', 'Features', 'About'];
@@ -27,6 +28,8 @@ const [anchorElUser, setAnchorElUser] = React.useState(null);
 const [name, setName] = useState('');
 const [profileImageUrl, setProfileImageUrl] = useState('');
 
+const fcmToken = localStorage.getItem('fcmToken');
+
 useEffect(()=>{
     if(!authUser) return;
     // console.log(JSON.stringify(authUser, null, 2))
@@ -37,8 +40,13 @@ useEffect(()=>{
         setProfileImageUrl(user ? user.profileImageUrl : authUser.photoURL);
     }
 
+    const saveFCMToken = async () => {
+        await saveFCMTokenToUser(authUser.uid, fcmToken);
+    }
+
     GetUserDetails();
-},[authUser])
+    saveFCMToken();
+},[authUser, fcmToken]);
 
 
 let navigate = useNavigate();
