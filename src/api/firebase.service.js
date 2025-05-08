@@ -1,9 +1,9 @@
-import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore"
 import { db } from "../firebase"
 
 
 /**
- * * create or return an existing conversation id between users
+ * * create or return an existing conversation_id between users
  * @param {{ authUserId: string }}
  * @param {{ profileImageUrl:string, email:string, username:string }} loggedUser
  * @param {{ id: string, profileImageUrl:string, username:string, email:string }} otherUser 
@@ -105,5 +105,63 @@ export const sendMessages = async (message, conversationId, userId) => {
     } catch (error) {
         console.error("Error sending messages : ", error);
         return error;
+    }
+}
+
+/**
+ * *real-time snapshot function for last-message update and unread-count update
+ * @param {{ conversationId:string, userId:string }}
+ * @returns {{ callback => lastMessage: string, unreadCount:number, timestamp: Date}}
+ */
+export const listenToConversationSummery = (conversationId, userId, callback) => {
+    const conversationRef = doc(db, "conversation", conversationId);
+
+    const unsubscribe = onSnapshot(conversationRef, (docSnapshot) => {
+        if(docSnapshot.exists()){
+            const data = docSnapshot.data();
+            const isOwnMessage = data.lastMessageSenderId === userId;
+
+            callback({
+                lastMessage: data.lastMessage || "",
+                unreadCount: isOwnMessage ? 0 : data.unreadCount || 0,
+                timestamp: data.timestamp ? new Date(data.timestamp.seconds *1000) : null
+            });
+        }
+    });
+
+    return unsubscribe;
+}
+
+/**
+ * * set unread count to zero when open the conversation
+ * @param {{ conversationId: string, userId:string }}
+ * @returns  null
+ */
+export const resetUnreadCount = async (conversationId, userId) => {
+    try {
+        const conversationRef = doc(db, "conversations", conversationId);
+        const docSnap = await getDoc(conversationRef);  
+
+        if(!docSnap.exists()) return;
+
+        const data = docSnap.data();
+
+        const lastSenderId = typeof data.lastMessageSenderId === "string" 
+            ? data.lastMessageSenderId 
+            : String(data.lastMessageSenderId || "");
+            
+        const currentUserId = typeof userId === "string" 
+            ? userId 
+            : String(userId || "");
+
+        if(lastSenderId !== currentUserId && data.unreadCount > 0){
+            await updateDoc(conversationRef, {  // Changed from update()
+                unreadCount: 0
+            });
+        }
+
+    } catch (error) {
+        console.error("Error resetting unread count", error);
+        throw error; 
     }
 }

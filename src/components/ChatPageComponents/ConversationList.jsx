@@ -40,6 +40,8 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
         getConversation();
     },[authUser]);
 
+  
+
     const handleNavigate = () => {
         navigate('/search-users');
     }

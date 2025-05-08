@@ -6,15 +6,17 @@ import { ConversationList } from './ConversationList';
 import { useState } from 'react';
 import { ChatWindow } from './ChatWindow';
 import EmptyChat from './EmptyChat';
+import { resetUnreadCount } from '../../api/firebase.service';
 
 export const ChatSection = ({ authUser }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [selectedConversation, setSelectedConversation] = useState(null);
 
-    const handleSelectedConversation = (conversation) => {
+    const handleSelectedConversation = async (conversation) => {
         setSelectedConversation(conversation);
-        console.log("Selected Conversation Details :", conversation);
+        // console.log("Selected Conversation Details :", conversation);
+        await resetUnreadCount( conversation?.id,  authUser.uid );
     }
 
     const handleBack = () => {

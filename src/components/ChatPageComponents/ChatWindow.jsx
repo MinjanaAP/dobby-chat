@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
 import { ChatInput } from "./ChatInput";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const MOCK_MESSAGES = [
     {
@@ -60,6 +62,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
         profileImage:"",
         typing:""
     });
+    const [messages, setMessages] = useState([]);
 
     useEffect(() => {
             if (!conversation) return;
@@ -82,6 +85,24 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
             }
             
         }, [conversation, authUser]);
+
+    //? Fetch messages real-time
+    useEffect(()=>{
+        if(!conversation?.id) return;
+
+        const messageRef = collection(db, "conversations", conversation.id, "messages");
+        const q = query(messageRef, orderBy("timestamp",'asc'));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const msgs = snapshot.docs.map((doc)=> ({
+                id:doc.id,
+                ...doc.data()
+            }));
+            setMessages(msgs);
+            console.log("Messages", JSON.stringify(msgs, null, 2));
+        });
+        return () => unsubscribe();
+    },[conversation?.id]);
 
     const closePinnedMessages = () => {
         setPinnedClose(true);
@@ -182,7 +203,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
             ) }
 
             <Box sx={{ flex:.8, overflowY:'auto', padding: 2 }} >
-                {MOCK_MESSAGES.map((message) => (
+                {messages.map((message) => (
                     <Message key={message.id} message={message} authUser={authUser}/>
                 ))}
                 {!receiver.typing && (

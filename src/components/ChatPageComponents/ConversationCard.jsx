@@ -1,20 +1,24 @@
 import { Avatar, Typography, Box } from "@mui/material";
 import { CheckCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { listenToConversationSummery } from "../../api/firebase.service";
+import { db } from "../../firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 
 export const ConversationCard = ({ conversation, onClick, authUser }) => {
 
     const {
         senderDetails,
         receiverDetails,
-        lastMessage,
         timestamp,
-        unreadCount,
         typingStatus,
         pinned
     } = conversation;
 
     const [online, setOnline]  = useState(false);
+    const [lastMessage, setLastMessage] = useState('');
+    const [unreadCount, setUnreadCount] = useState('');
+    const [lastUpdate, setLastUpdate] = useState('');
 
     const [receiver, setReceiver] = useState({
         id:"",
@@ -44,6 +48,28 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
         }
         
     }, [conversation, authUser]);
+
+    useEffect(() => {
+        if (!conversation || !authUser?.uid) return;
+    
+        const conversationRef = doc(db, "conversations", conversation.id);
+
+        const unsubscribe = onSnapshot(conversationRef, (docSnap) => {
+            if(!docSnap.exists()) return;
+
+            const data = docSnap.data();
+            setLastMessage(data.lastMessage || "");
+            setUnreadCount(
+                data.lastMessageSenderId === authUser.uid ? 0 : data.unreadCount || 0
+            );
+            if(data.timestamp){
+                setLastUpdate(new Date(data.timestamp.second*1000));
+            }
+        });
+
+        return () => unsubscribe();
+    }, [conversation?.id, authUser?.uid]);
+
 
     return (
         <Box
