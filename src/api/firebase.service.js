@@ -165,3 +165,18 @@ export const resetUnreadCount = async (conversationId, userId) => {
         throw error; 
     }
 }
+
+/**
+ * * Update typing status
+ * @param {{ conversationId:string, userId:string, isTyping:boolean }}
+ */
+export const updateTypingStatus = async (conversationId, userId, isTyping) => {
+    try {
+        const conversationRef = doc(db, 'conversations', conversationId);
+        await updateDoc(conversationRef, {
+            [`typingStatus.${userId}`]: isTyping
+        });
+    } catch (error) {
+        console.error("Error updating typing status:", error);
+    }
+}

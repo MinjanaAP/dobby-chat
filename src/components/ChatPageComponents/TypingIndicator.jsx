@@ -8,7 +8,7 @@ const bounceAnimation = {
 },
 };
 
-export const TypingIndicator = () => {
+export const TypingIndicator = ({ receiver }) => {
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'gray', fontSize: '14px' }}>
     <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -27,7 +27,7 @@ export const TypingIndicator = () => {
         />
         ))}
     </Box>
-    <Typography variant="body2">Alex is typing...</Typography>
+    <Typography variant="body2">{receiver} is typing...</Typography>
     </Box>
     )
 }
