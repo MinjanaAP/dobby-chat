@@ -11,6 +11,11 @@ export const Message = ({authUser, message}) => {
 
     const isMine = senderId === authUser.uid;
 
+    const formattedTimestamp = new Date(timestamp?.seconds*1000).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    })
+
     return (
         <Box display="flex" justifyContent={isMine ? 'flex-end' : 'flex-start'} >
             <Box maxWidth="70%" order={isMine ? 1:0} >
@@ -37,7 +42,7 @@ export const Message = ({authUser, message}) => {
                     mt={0.5}
                     >
                     <Typography variant="caption" color="gray">
-                        {timestamp}
+                        {formattedTimestamp}
                     </Typography>
                     {isMine && status === 'read' && (
                         <DoneAllOutlined fontSize="small" sx={{ color: '#4f46e5' }} />
