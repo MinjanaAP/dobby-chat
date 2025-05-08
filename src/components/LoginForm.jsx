@@ -26,6 +26,7 @@ const LoginForm = ()=>{
         e.preventDefault();
         try {
             await signInWithEmail(email, password);
+            
         } catch (error) {
             setError(error.message);
         }
