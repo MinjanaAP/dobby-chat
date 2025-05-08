@@ -28,7 +28,7 @@ export const Message = ({authUser, message}) => {
                         background: isMine
                         ? 'linear-gradient(to right, #4f46e5, #6366f1)'
                         : 'rgba(255, 255, 255, 0.1)',
-                        color: isMine ? 'white' : 'inherit',
+                        color: isMine ? 'white' : 'white',
                         backdropFilter: isMine ? undefined : 'blur(4px)',
                     }}
                 >

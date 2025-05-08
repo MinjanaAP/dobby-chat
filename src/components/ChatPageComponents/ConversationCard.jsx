@@ -1,7 +1,6 @@
 import { Avatar, Typography, Box } from "@mui/material";
 import { CheckCheck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { listenToConversationSummery } from "../../api/firebase.service";
 import { db } from "../../firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 
@@ -11,7 +10,6 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
         senderDetails,
         receiverDetails,
         timestamp,
-        typingStatus,
         pinned
     } = conversation;
 
@@ -19,6 +17,7 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
     const [lastMessage, setLastMessage] = useState('');
     const [unreadCount, setUnreadCount] = useState('');
     const [lastUpdate, setLastUpdate] = useState('');
+    const [typingStatus, setTypingStatus] = useState({});
 
     const [receiver, setReceiver] = useState({
         id:"",
@@ -58,6 +57,7 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
             if(!docSnap.exists()) return;
 
             const data = docSnap.data();
+            setTypingStatus(data.typingStatus || {});
             setLastMessage(data.lastMessage || "");
             setUnreadCount(
                 data.lastMessageSenderId === authUser.uid ? 0 : data.unreadCount || 0
@@ -65,10 +65,15 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
             if(data.timestamp){
                 setLastUpdate(new Date(data.timestamp.second*1000));
             }
+
         });
 
         return () => unsubscribe();
     }, [conversation?.id, authUser?.uid]);
+
+    const otherUserTyping = Object.entries(typingStatus).some(
+        ([userId, isTyping]) => userId !== authUser.uid && isTyping
+    );
 
 
     return (
@@ -133,19 +138,19 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
                     </Box>
 
                     <Box display="flex" alignItems="center" gap={0.5}>
-                        {unreadCount === 0 && (
+                        {(unreadCount === 0 && !otherUserTyping )&& (
                             <CheckCheck size={16} color="#4f46e5" style={{ flexShrink: 0 }} />
                         )}
                         <Typography
                             variant="body2"
                             sx={{
-                                color: typingStatus[receiver.id] ? '#4f46e5' : 'gray',
+                                color: otherUserTyping ? '#4f46e5' : 'gray',
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                             }}
                         >
-                            {typingStatus[receiver.id] ? 'typing...' : lastMessage}
+                            {otherUserTyping? 'typing...' : lastMessage}
                         </Typography>
                     </Box>
                 </Box>

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
 import { ChatInput } from "./ChatInput";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
 
 const MOCK_MESSAGES = [
@@ -52,7 +52,6 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
     const {
         senderDetails,
         receiverDetails,
-        typingStatus,
     } = conversation;
 
     const [pinnedClose, setPinnedClose] = useState(false);
@@ -63,6 +62,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
         typing:""
     });
     const [messages, setMessages] = useState([]);
+    const [typingStatus, setTypingStatus] = useState({});
 
     useEffect(() => {
             if (!conversation) return;
@@ -103,6 +103,24 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
         });
         return () => unsubscribe();
     },[conversation?.id]);
+
+    //? catch typing status change real-time
+    useEffect(() => {
+        const conversationRef = doc(db, 'conversations', conversation?.id);
+
+        const unsubscribe = onSnapshot(conversationRef, (docSnap) => {
+            if(docSnap.exists()){
+                const data = docSnap.data();
+                setTypingStatus(data.typingStatus || {});
+            }
+        });
+
+        return () => unsubscribe();
+    },[conversation?.id]);
+
+    const otherUserTyping = Object.entries(typingStatus).some(
+        ([userId, isTyping]) => userId !== authUser.uid && isTyping
+    );
 
     const closePinnedMessages = () => {
         setPinnedClose(true);
@@ -206,8 +224,8 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                 {messages.map((message) => (
                     <Message key={message.id} message={message} authUser={authUser}/>
                 ))}
-                {!receiver.typing && (
-                    <TypingIndicator/>
+                {otherUserTyping && (
+                    <TypingIndicator receiver={receiver?.name}/>
                 )}
             </Box>
             <ChatInput conversation={conversation} authUser={authUser} />

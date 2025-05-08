@@ -2,11 +2,13 @@ import { AttachFileOutlined, InsertEmoticonOutlined } from "@mui/icons-material"
 import { Box, IconButton, Paper } from "@mui/material"
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import { MicIcon, SendIcon, Send } from "lucide-react"
-import { useState } from "react";
-import { sendMessages } from "../../api/firebase.service";
+import { useCallback, useRef, useState } from "react";
+import { sendMessages, updateTypingStatus } from "../../api/firebase.service";
+import _ from "lodash"; 
 
 export const ChatInput = ({conversation, authUser}) => {
     const [message, setMessage] = useState('');
+    const typingTimeoutRef = useRef(null);
 
     const handleKeyDown = (e) => {
         const isDesktop = window.innerWidth > 768;
@@ -27,6 +29,26 @@ export const ChatInput = ({conversation, authUser}) => {
             }
         }
     }
+
+    const handleTyping = (e) => {
+        const val = e.target.value;
+        setMessage(val);
+        throttledTyping(true);
+
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => {
+            throttledTyping(false);
+        }, 2000);
+        
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const throttledTyping = useCallback(
+        _.throttle((isTyping) => {
+            updateTypingStatus(conversation.id, authUser.uid, isTyping);
+        }, 500),
+        [conversation.id, authUser.uid]
+    );
 
     return (
         <Paper
@@ -51,7 +73,7 @@ export const ChatInput = ({conversation, authUser}) => {
                     maxRows={6}
                     placeholder="Type a message..."
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={handleTyping}
                     onKeyDown={handleKeyDown}
                     style={{
                     width: '100%',
