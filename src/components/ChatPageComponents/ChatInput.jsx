@@ -6,7 +6,7 @@ import { useCallback, useRef, useState } from "react";
 import { sendMessages, updateTypingStatus } from "../../api/firebase.service";
 import _ from "lodash"; 
 
-export const ChatInput = ({conversation, authUser}) => {
+export const ChatInput = ({conversation, authUser, receiverId}) => {
     const [message, setMessage] = useState('');
     const typingTimeoutRef = useRef(null);
     const isDesktop = window.innerWidth > 768;
@@ -23,7 +23,10 @@ export const ChatInput = ({conversation, authUser}) => {
             const result = await sendMessages(message,conversation.id,authUser.uid);
             setMessage('');
             if(result.status){
-                console.log('Message send.')
+                console.log('Message send.');
+
+                //? Send push notification to receiver
+                
             }else{
                 console.error("Error in sending message : ", result);
             }

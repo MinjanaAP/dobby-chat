@@ -13,7 +13,21 @@ import { useEffect } from 'react';
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPIDKEY;
 
 function App() {
-  useEffect(() => {
+    useEffect(() => {
+    
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("Message received in foreground:", payload);
+
+      if (Notification.permission === 'granted') {
+        const { title, body, image } = payload.notification;
+        new Notification(title, {
+          body,
+          icon: image || './assets/images/logo.png',
+        });
+      }
+    });
+
+    //? Request notification permission and get FCM token
     Notification.requestPermission().then((permission) => {
       if (permission === 'granted') {
         getToken(messaging, { vapidKey: VAPID_KEY })
@@ -21,20 +35,22 @@ function App() {
             if (currentToken) {
               console.log("FCM Token:", currentToken);
               localStorage.setItem("fcmToken", currentToken);
-            }else{
-              console.log("NO FCM Registration token available.")
+            } else {
+              console.log("NO FCM Registration token available.");
             }
           })
           .catch((err) => {
             console.error("An error occurred while retrieving FCM token. ", err);
           });
-
-          onMessage(messaging, (payload) => {
-            console.log("Message received in foreground:", payload);
-          })
       }
-    })
-  },[])
+    });
+
+    return () => {
+      unsubscribe(); 
+    };
+  }, []);
+
+  
   const [user, loading] = useAuthState(auth);
 
   if (loading) return <LoadingPage/>; 
