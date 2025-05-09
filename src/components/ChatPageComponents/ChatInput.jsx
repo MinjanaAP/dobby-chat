@@ -5,6 +5,7 @@ import { MicIcon, SendIcon, Send } from "lucide-react"
 import { useCallback, useRef, useState } from "react";
 import { sendMessages, updateTypingStatus } from "../../api/firebase.service";
 import _ from "lodash"; 
+import { sendPushNotification } from "../../api/pushNotificationApi";
 
 export const ChatInput = ({conversation, authUser, receiverId}) => {
     const [message, setMessage] = useState('');
@@ -21,12 +22,21 @@ export const ChatInput = ({conversation, authUser, receiverId}) => {
         if (message.trim()) {
             // console.log("Message : ", message + "\n Conversation id : " + JSON.stringify(conversation, null, 2) + "\n authUser id : " +authUser.uid);
             const result = await sendMessages(message,conversation.id,authUser.uid);
+            // alert(JSON.stringify(authUser));
+            const username = authUser.displayName ? authUser.displayName : authUser.email;
+            const messageData = {
+                userId : receiverId,
+                title : "New Message",
+                body: `${username} : ${message}`
+            }
+            console.log("Message Data", messageData);
+
             setMessage('');
             if(result.status){
                 console.log('Message send.');
-
                 //? Send push notification to receiver
-                
+                const response = await sendPushNotification(messageData);
+                if (response) console.log("Push notification send", response);
             }else{
                 console.error("Error in sending message : ", result);
             }
