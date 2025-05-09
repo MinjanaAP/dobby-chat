@@ -204,7 +204,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                 )}
                 
             </Box>
-            <ChatInput conversation={conversation} authUser={authUser} />
+            <ChatInput conversation={conversation} authUser={authUser} receiverId={receiver.id}/>
         </Box>
     )
 }

@@ -5,7 +5,7 @@ import App from './App.jsx'
 
 //? Register service worker
 if ('serviceWorker' in navigator ) {
-  window.addEventListener( 'laod', () => { 
+  window.addEventListener( 'load', () => { 
     navigator.serviceWorker
       .register('/firebase-messaging-sw.js')
       .then((registration) => {
