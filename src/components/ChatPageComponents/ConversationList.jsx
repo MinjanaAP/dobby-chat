@@ -25,7 +25,7 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
             try {
                 setLoading(true);
                 const conversations = await getLoggedUsersConversations(authUser.uid);
-                console.log("conversations", JSON.stringify(conversations, null,2));
+                // console.log("conversations", JSON.stringify(conversations, null,2));
                 if(!conversations){
                     console.error("Error in getting conversations.");
                 }

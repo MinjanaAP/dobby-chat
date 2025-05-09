@@ -68,7 +68,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                 ...doc.data()
             }));
             setMessages(msgs);
-            console.log("Messages", JSON.stringify(msgs, null, 2));
+            // console.log("Messages", JSON.stringify(msgs, null, 2));
         });
         return () => unsubscribe();
     },[conversation?.id]);
