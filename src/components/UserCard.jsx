@@ -13,9 +13,9 @@ const UserCard = ({user, authUser}) =>{
 
     const createNewConversation = async () => {
         const getUser = await getUserDetails(authUser?.uid);
-        console.log("logged user get details : ", JSON.stringify(getUser,null,2));
-        console.log("logged user : ", JSON.stringify(authUser,null,2));
-        console.log("Other user : ", JSON.stringify(user,null,2));
+        // console.log("logged user get details : ", JSON.stringify(getUser,null,2));
+        // console.log("logged user : ", JSON.stringify(authUser,null,2));
+        // console.log("Other user : ", JSON.stringify(user,null,2));
         try {
             const newConversationId = await createConversation(authUser.uid, getUser, user);
             if (newConversationId) {
@@ -32,6 +32,7 @@ const UserCard = ({user, authUser}) =>{
 
     return(
         <Card
+        onClick={createNewConversation}
         sx={{
             position: "relative",
             display: "flex",
