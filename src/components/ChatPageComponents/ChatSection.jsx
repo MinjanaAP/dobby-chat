@@ -6,7 +6,7 @@ import { ConversationList } from './ConversationList';
 import { useEffect, useState } from 'react';
 import { ChatWindow } from './ChatWindow';
 import EmptyChat from './EmptyChat';
-import { resetUnreadCount } from '../../api/firebase.service';
+import { getConversationById, resetUnreadCount } from '../../api/firebase.service';
 import { useSearchParams } from 'react-router-dom';
 
 export const ChatSection = ({ authUser }) => {
@@ -19,15 +19,21 @@ export const ChatSection = ({ authUser }) => {
 
     //? Get created or selected conversationId from params
     useEffect(()=>{
-        if(conversationId) {
-            // setSelectedConversation(conversationId);
-            //TODO : get Conversation details
-            console.log("Selected conversation ID:", conversationId);
-        }else{
-            selectedConversation(null);
+        if(!conversationId) return;
+
+        const fetchConversationDetails = async () => {
+            const conversation = await getConversationById(conversationId);
+            if(conversation){
+                // console.warn("conversation Details :", JSON.stringify(conversation, null, 2));
+
+                setSelectedConversation(conversation);
+            }else{
+                setSelectedConversation(null);
+            }
         }
 
-    }, [conversationId, selectedConversation]);
+        fetchConversationDetails();
+    }, [conversationId]);
 
     const handleSelectedConversation = async (conversation) => {
         setSelectedConversation(conversation);

@@ -35,7 +35,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
 
     useEffect(() => {
             if (!conversation) return;
-            // console.error("authUser", JSON.stringify(authUser, null, 2));
+            // console.error("conversation", JSON.stringify(conversation, null, 2));
         
             if (senderDetails.id === authUser.uid) {
                 setReceiver({
@@ -53,7 +53,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                 });
             }
             
-        }, [conversation, authUser]);
+        }, [conversation]);
 
     //? Fetch messages real-time
     useEffect(()=>{

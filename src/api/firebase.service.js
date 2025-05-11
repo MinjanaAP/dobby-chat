@@ -74,6 +74,37 @@ export const getLoggedUsersConversations = async (authUserId) => {
     }
 }
 
+/**
+ * * GET conversation details By ID
+ * @param {string} conversationId 
+ * @returns 
+ */
+export const getConversationById = async (conversationId) => {
+    try {
+        const conversationRef = doc(db, "conversations", conversationId);
+        const conversationSnap = await getDoc(conversationRef);
+        if(conversationSnap.exists()) {
+            return {
+                id: conversationSnap.id,
+                ...conversationSnap.data()
+            };
+        }else {
+            console.warn("No conversation found with ID:", conversationId);
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting conversation details :", error);
+        return null;
+    }
+}
+
+/**
+ * * Send Messages to firebase
+ * @param {* string} message 
+ * @param {* string} conversationId 
+ * @param {* string} userId 
+ * @returns 
+ */
 export const sendMessages = async (message, conversationId, userId) => {
     try {
         const messageRef = collection(db, "conversations", conversationId, "messages");
