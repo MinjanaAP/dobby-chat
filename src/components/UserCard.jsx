@@ -94,7 +94,6 @@ const UserCard = ({user, authUser}) =>{
                         transition: "color 0.3s",
                         "&:hover": { color: "#4f46e5" },
                     }}
-                    onClick={createNewConversation}
                     />
                 </IconButton>
 
