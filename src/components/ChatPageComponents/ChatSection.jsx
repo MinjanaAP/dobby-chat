@@ -3,15 +3,31 @@ import { ArrowBackIosRounded } from '@mui/icons-material';
 import { Box, IconButton, useMediaQuery } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import { ConversationList } from './ConversationList';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChatWindow } from './ChatWindow';
 import EmptyChat from './EmptyChat';
 import { resetUnreadCount } from '../../api/firebase.service';
+import { useSearchParams } from 'react-router-dom';
 
 export const ChatSection = ({ authUser }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [selectedConversation, setSelectedConversation] = useState(null);
+    const [searchParams] = useSearchParams();
+
+    const conversationId = searchParams.get('conversationId');
+
+    //? Get created or selected conversationId from params
+    useEffect(()=>{
+        if(conversationId) {
+            // setSelectedConversation(conversationId);
+            //TODO : get Conversation details
+            console.log("Selected conversation ID:", conversationId);
+        }else{
+            selectedConversation(null);
+        }
+
+    }, [conversationId, selectedConversation]);
 
     const handleSelectedConversation = async (conversation) => {
         setSelectedConversation(conversation);

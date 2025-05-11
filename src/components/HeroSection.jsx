@@ -7,7 +7,7 @@ const HeroSection = ({ authUser }) => {
     const navigate = useNavigate();
     const onGetStarted=()=>{
         if(authUser){
-            navigate('/search-users')
+            navigate('/conversations')
         }else{
             navigate('/login')
         }

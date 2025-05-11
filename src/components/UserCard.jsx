@@ -21,7 +21,7 @@ const UserCard = ({user, authUser}) =>{
             if (newConversationId) {
                 setConversationId(newConversationId);
                 console.log("Conversation Id : ", newConversationId);
-                navigate('/conversations');
+                navigate(`/conversations?conversationId=${newConversationId}`);
             }else{
                 console.error("Error in creating conversation.");
             }
