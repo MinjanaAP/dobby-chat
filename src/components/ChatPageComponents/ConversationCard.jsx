@@ -75,6 +75,11 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
         ([userId, isTyping]) => userId !== authUser.uid && isTyping
     );
 
+     const formattedTimestamp = new Date(timestamp?.seconds*1000).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    })
+
 
     return (
         <Box
@@ -133,7 +138,7 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
                             variant="caption"
                             sx={{ color: 'gray', marginLeft: 1, whiteSpace: 'nowrap' }}
                         >
-                            {new Date(timestamp.seconds * 1000).toLocaleTimeString()}
+                            {formattedTimestamp}
                         </Typography>
                     </Box>
 
