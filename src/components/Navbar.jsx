@@ -19,7 +19,7 @@ import { auth } from '../firebase';
 import { saveFCMTokenToUser } from '../api/firebase.service';
 
 
-const pages = ['Home','Chats', 'Features', 'About'];
+const pages = ['Home','Chats', 'New Chat', 'About'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar({authUser}) {
