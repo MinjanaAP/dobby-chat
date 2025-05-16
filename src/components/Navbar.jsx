@@ -13,7 +13,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
-import { getUserDetails } from '../services/userServices';
+import { getUserDetails, logoutUser } from '../services/userServices';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { saveFCMTokenToUser } from '../api/firebase.service';
@@ -72,7 +72,8 @@ const handleClick = (setting) => {
 }
 
 const handleLogout = async () => {
-    signOut(auth);
+    
+    await logoutUser(auth.currentUser);
     console.log("Logout successful.");
 }
 
