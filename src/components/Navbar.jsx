@@ -14,7 +14,6 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
 import { getUserDetails, logoutUser } from '../services/userServices';
-import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { saveFCMTokenToUser } from '../api/firebase.service';
 
@@ -293,7 +292,10 @@ return (
                             handleCloseUserMenu();
                             if (setting === "Logout") {
                                 handleLogout();
-                            } else {
+                            } else if (setting === "Profile") {
+                                navigate('/profile');
+                            }
+                            else {
                                 handleClick(setting);
                             }
                         }}

@@ -12,6 +12,7 @@ import { useEffect } from 'react';
 import { db, rtdb } from './firebase.js';
 import { onDisconnect, onValue, ref, serverTimestamp, set } from 'firebase/database';
 import { doc, serverTimestamp as fsTimestamp, updateDoc } from 'firebase/firestore';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPIDKEY;
 
@@ -134,6 +135,11 @@ function App() {
         <Route
           path='/conversations'
           element={user ? <ChatPage user={user}/> : <Navigate to="/login" />} 
+        />
+
+        <Route
+          path='/profile'
+          element={ user ? <ProfilePage user={user}/> : <Navigate to="/login" />}
         />
       </Routes>
     </BrowserRouter>
