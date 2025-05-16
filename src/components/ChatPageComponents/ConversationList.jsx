@@ -123,7 +123,7 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
             </Box>
 
             {/* Conversation Items */}
-            <Box flex={1} overflow="auto" >
+            <Box flex={1} overflow="auto" paddingBottom={16}>
                 {!loading ? (
                     filteredConversation.length === 0 ? (
                         <EmptyConversationList/>
