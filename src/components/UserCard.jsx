@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 
 const UserCard = ({user, authUser}) =>{
-    const isOnline = true;
+    const isOnline = user.status === "online" ? true : false;
     const [conversationId, setConversationId] = useState(null);
     const navigate = useNavigate();
 
@@ -29,6 +29,11 @@ const UserCard = ({user, authUser}) =>{
             console.error("Error in creating conversation.", error);
         }
     }
+
+    const formattedTimestamp = new Date(user.lastActive?.seconds*1000).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    })
 
     return(
         <Card
@@ -57,25 +62,27 @@ const UserCard = ({user, authUser}) =>{
                     alt= {user.username}
                     sx={{ width: 48, height: 48 }}
                 />
+                {isOnline && (
                 <Box
-                sx={{
-                    position: "absolute",
-                    bottom: 0,
-                    right: 0,
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    border: "2px solid #0a0a1f",
-                    backgroundColor: isOnline ? "green" : "gray",
-                }}
+                    sx={{
+                        position: "absolute",
+                        bottom: 0,
+                        right: 0,
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        border: "2px solid #0a0a1f",
+                        backgroundColor:  "green",
+                    }}
                 />
+                )}
                 </Box>
                 <Box flex={1}>
                     <Typography sx={{ color: "#fff", fontWeight: 500, textAlign:'start' }}>
                     {user.username}
                     </Typography>
                     <Typography sx={{ color: "gray", fontSize: "0.875rem", textAlign:'start' }}>
-                    lastActive
+                    {user.lastActive ? formattedTimestamp : 'offline'}
                     </Typography>
                 </Box>
 

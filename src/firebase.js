@@ -27,7 +27,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-// export const rtdb = getDatabase();
+export const rtdb = getDatabase();
 export const googleProvider = new GoogleAuthProvider();
 const messaging = getMessaging(app);
 export { messaging, getToken, onMessage };

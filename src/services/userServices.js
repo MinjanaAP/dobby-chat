@@ -1,5 +1,7 @@
-import { collection, doc, getDoc, getDocs } from "firebase/firestore"
-import { db } from "../firebase"
+import { collection, doc, getDoc, getDocs, serverTimestamp as fsTimeStamp, updateDoc } from "firebase/firestore"
+import { auth, db, rtdb } from "../firebase"
+import { ref, serverTimestamp, set } from "firebase/database";
+import { signOut } from "firebase/auth";
 
 export const getUserDetails = async (userId)=>{
     try {
@@ -30,3 +32,24 @@ export const getAllUsers = async ()=>{
         throw error;
     }
 }
+
+export const logoutUser = async (user) => {
+    if (!user) return;
+
+    // Update Realtime Database status
+    const userStatusDBRef = ref(rtdb, `/status/${user.uid}`);
+    await set(userStatusDBRef, {
+        state: 'offline',
+        lastActive: serverTimestamp(),
+    });
+
+    // Update Firestore status
+    const userDocRef = doc(db, 'users', user.uid);
+    await updateDoc(userDocRef, {
+        status: 'offline',
+        lastActive: fsTimeStamp(),
+    });
+
+    await signOut(auth);
+    
+} 

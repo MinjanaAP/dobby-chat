@@ -9,8 +9,52 @@ import UserSearchPage from './pages/UserSearchPage';
 import LoadingPage from './components/LoadingPage';
 import { ChatPage } from './pages/ChatPage';
 import { useEffect } from 'react';
+import { db, rtdb } from './firebase.js';
+import { onDisconnect, onValue, ref, serverTimestamp, set } from 'firebase/database';
+import { doc, serverTimestamp as fsTimestamp, updateDoc } from 'firebase/firestore';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPIDKEY;
+
+  export const setupPresence = (user) => {
+    if (!user) return;
+
+    const userStatusDBRef = ref(rtdb, `/status/${user.uid}`);
+    const userDocRef = doc(db, "users", user.uid);
+
+    const isOffline = {
+      state: "offline",
+      lastActive: serverTimestamp(),
+    }
+
+    const isOnline = {
+      state : "online",
+      lastActive: serverTimestamp(),
+    }
+
+    const isOfflineForFirestore = {
+      status: "offline",
+      lastActive: fsTimestamp(),
+    };
+
+    const isOnlineForFirestore = {
+      status: "online",
+      lastActive: fsTimestamp(),
+    };
+
+    const connectedRef = ref(rtdb,".info/connected");
+    onValue(connectedRef, async (snapshot) => {
+      if (snapshot.val() === false) {
+        await updateDoc(userDocRef, isOfflineForFirestore);
+      return;
+      }
+    });
+
+    onDisconnect(userStatusDBRef).set(isOffline).then(async () => {
+      await set(userStatusDBRef, isOnline);
+      await updateDoc(userDocRef, isOnlineForFirestore);
+    })
+  }
+
 
 function App() {
     useEffect(() => {
@@ -52,6 +96,13 @@ function App() {
 
   
   const [user, loading] = useAuthState(auth);
+
+  useEffect(() => {
+    if (user) {
+      setupPresence(user);
+    }
+  }, [user]);
+
 
   if (loading) return <LoadingPage/>; 
 
