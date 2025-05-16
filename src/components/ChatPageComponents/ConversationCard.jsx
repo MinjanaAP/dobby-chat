@@ -1,8 +1,9 @@
 import { Avatar, Typography, Box } from "@mui/material";
 import { CheckCheck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { db } from "../../firebase";
+import { db, rtdb } from "../../firebase";
 import { doc, onSnapshot } from "firebase/firestore";
+import { onValue, ref } from "firebase/database";
 
 export const ConversationCard = ({ conversation, onClick, authUser }) => {
 
@@ -47,6 +48,28 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
         }
         
     }, [conversation, authUser]);
+
+    //? get receiver online status
+    useEffect(() => {
+        if (!receiver?.id) return;
+        
+        const statusRef = ref(rtdb, `/status/${receiver.id}`);
+
+        const unsubscribe = onValue(statusRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                // console.log("🔥 Got data:", data);
+                setOnline(data.state === 'online');
+            } else {
+                // console.log("⚠️ No snapshot at:", `/status/${receiver.id}`);
+                setOnline(false); 
+            }
+        },
+        (error) => { console.error("❌ Firebase listener error:", error); }
+        );
+
+        return () => unsubscribe();
+    }, [receiver?.id]);
 
     useEffect(() => {
         if (!conversation || !authUser?.uid) return;

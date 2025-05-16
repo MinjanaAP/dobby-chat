@@ -7,8 +7,9 @@ import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
 import { ChatInput } from "./ChatInput";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db, rtdb } from "../../firebase";
 import EmptyConversation from "./EmptyConversation";
+import { onValue, ref } from "firebase/database";
 
 export const ChatWindow = ({ conversation, onBack, authUser }) => {
     const {
@@ -17,6 +18,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
     } = conversation;
 
     const [pinnedClose, setPinnedClose] = useState(false);
+    const [online, setOnline]  = useState(false);
     const [receiver, setReceiver] = useState({
         id:"",
         name:"",
@@ -54,6 +56,28 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
             }
             
         }, [conversation]);
+
+    //? get receiver online status
+        useEffect(() => {
+            if (!receiver?.id) return;
+            
+            const statusRef = ref(rtdb, `/status/${receiver.id}`);
+    
+            const unsubscribe = onValue(statusRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    // console.log("🔥 Got data:", data);
+                    setOnline(data.state === 'online');
+                } else {
+                    // console.log("⚠️ No snapshot at:", `/status/${receiver.id}`);
+                    setOnline(false); 
+                }
+            },
+            (error) => { console.error("❌ Firebase listener error:", error); }
+            );
+    
+            return () => unsubscribe();
+        }, [receiver?.id]);
 
     //? Fetch messages real-time
     useEffect(()=>{
@@ -125,15 +149,21 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                         <ArrowBackIosNewRounded fontSize="small" />
                     </IconButton>
                     
-                    <Avatar 
-                        src={receiver.profileImage} 
-                        alt={receiver.name} 
-                        sx={{ 
-                            width: 40, 
-                            height: 40,
-                            border: '2px solid rgba(255,255,255,0.1)'
-                        }} 
-                    />
+                    <Box position="relative">
+                        <Avatar src={receiver.profileImage} alt={receiver.name} sx={{ width: 48, height: 48 }} />
+                        {online && (
+                            <Box
+                                position="absolute"
+                                bottom={0}
+                                right={0}
+                                width={12}
+                                height={12}
+                                bgcolor="green"
+                                border="2px solid #0a0a1f"
+                                borderRadius="50%"
+                            />
+                        )}
+                    </Box>
                     
                     <Box justifyContent="start" >
                         <Typography fontWeight={500} color="white">
@@ -153,7 +183,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                             </Typography>
                         ):(
                             <Typography variant="body2" color="gray" sx={{ textAlign:"start" }}>
-                                {conversation.online ? 'Online' : 'Offline'}
+                                {online ? 'Online' : 'Offline'}
                             </Typography>
                         )}
                         
