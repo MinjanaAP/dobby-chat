@@ -2,13 +2,15 @@ import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material"
 import SearchIcon from '@mui/icons-material/Search';
 import UserCard from "./UserCard";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getAllUsers } from "../services/userServices";
 import ConversationCardSkeleton from "./Skeleton/ConversationCardSkeleton";
+import EmptyConversationList from "./ChatPageComponents/EmptyConversationList";
 
 const UserSearchSection = ({currentUser})=>{
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [searchText, setSearchText] = useState('');
 
     
     useEffect(()=>{
@@ -18,7 +20,7 @@ const UserSearchSection = ({currentUser})=>{
                 const allUsers = await getAllUsers();
                 setUsers(allUsers);
                 setLoading(false);
-                // console.log(JSON.stringify(allUsers, null, 2));
+                console.log(JSON.stringify(allUsers, null, 2));
             } catch (error) {
                 console.error("Failed to fetch users:", error);
                 setLoading(false);
@@ -27,6 +29,15 @@ const UserSearchSection = ({currentUser})=>{
 
         GetAllUsers();
     },[]);
+
+    const filteredUsers = useMemo(() => {
+        if (!searchText) return users;
+
+        return users.filter((user) => 
+            user.username?.toLowerCase().includes(searchText) ||
+            user.email?.toLowerCase().includes(searchText)
+        );
+    },[users, searchText]);
 
     return(
         <Box
@@ -57,6 +68,10 @@ const UserSearchSection = ({currentUser})=>{
                     fullWidth
                     variant="outlined"
                     placeholder="Search for users..."
+                    onChange={(e) => {
+                        e.preventDefault();
+                        setSearchText(e.target.value.toLowerCase());
+                    }}
                     sx={{
                         mb: 3,
                         "& .MuiOutlinedInput-root": {
@@ -85,7 +100,9 @@ const UserSearchSection = ({currentUser})=>{
                 />
                 <Box flex={1} overflow="auto" maxHeight="75vh">
                     {!loading ? (
-                        users?.filter((user) => user.id !== currentUser?.uid).map((user) => (       
+                        filteredUsers.length === 0 ?
+                        <EmptyConversationList title={"No user found."} description={"Invite them to join dobby~chat."}/> :
+                        filteredUsers?.filter((user) => user.id !== currentUser?.uid).map((user) => (       
                                 <UserCard key={user.id} user={user} authUser={currentUser}/>
                         ))
                     ):(

@@ -1,7 +1,7 @@
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputBase, List, ListItem, Paper, Button, Typography, useMediaQuery } from "@mui/material";
 import { ConversationCard } from "./ConversationCard";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getLoggedUsersConversations } from "../../api/firebase.service";
 import { useNavigate } from "react-router-dom";
 import ConversationCardSkeleton from "../Skeleton/ConversationCardSkeleton";
@@ -14,6 +14,7 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
 
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [searchText, setSearchText] = useState('');
     const navigate = useNavigate();
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -40,7 +41,18 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
         getConversation();
     },[authUser]);
 
-  
+    const handleSearch = (text) => {
+        setSearchText(text.toLowerCase());
+    }
+
+    const filteredConversation = useMemo(() => {
+        if (!searchText) return conversations;
+
+        return conversations.filter(conversation => 
+            conversation.receiverDetails.name?.toLowerCase().includes(searchText) ||
+            conversation.senderDetails.name?.toLowerCase().includes(searchText)
+        );
+    }, [conversations, searchText]);
 
     const handleNavigate = () => {
         navigate('/search-users');
@@ -78,6 +90,10 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
                                 color: 'gray',
                             },
                         }}
+                        onChange={(e) => {
+                            e.preventDefault();
+                            handleSearch(e.target.value);
+                        }}
                     />
                 </Paper>
                 <Button
@@ -109,11 +125,11 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
             {/* Conversation Items */}
             <Box flex={1} overflow="auto" >
                 {!loading ? (
-                    conversations.length === 0 ? (
+                    filteredConversation.length === 0 ? (
                         <EmptyConversationList/>
                     ):(
                         <List disablePadding>
-                            {conversations.map((conversation) => (
+                            {filteredConversation.map((conversation) => (
                                 <ListItem key={conversation.id} disableGutters >
                                     <ConversationCard conversation={conversation} onClick={onSelectedConversation} authUser={authUser}/>
                                 </ListItem>

@@ -9,7 +9,7 @@ const float = keyframes`
 50% { transform: translateY(-6px); }
 `;
 
-const EmptyConversationList = () => {
+const EmptyConversationList = ({title, description}) => {
 return (
     <Box
     height="100%"
@@ -47,12 +47,14 @@ return (
         WebkitTextFillColor: 'transparent',
         mb: 1,
     }}>
-        No Conversations Yet
+        {
+            title ? title : 'No Conversations Yet'
+        }
     </Typography>
 
     {/* Subtext */}
     <Typography variant="body2" color="#F7F4F071" maxWidth={300}>
-        Start a new conversation or wait for someone to message you.
+        { description ? description : 'Start a new conversation or wait for someone to message you.' }
     </Typography>
     </Box>
 );
