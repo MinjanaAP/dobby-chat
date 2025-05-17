@@ -1,7 +1,7 @@
 import { collection, doc, getDoc, getDocs, serverTimestamp as fsTimeStamp, updateDoc } from "firebase/firestore"
 import { auth, db, rtdb } from "../firebase"
 import { ref, serverTimestamp, set } from "firebase/database";
-import { signOut } from "firebase/auth";
+import { EmailAuthProvider, getAuth, reauthenticateWithCredential, signOut, updatePassword } from "firebase/auth";
 
 export const getUserDetails = async (userId)=>{
     try {
@@ -53,3 +53,29 @@ export const logoutUser = async (user) => {
     await signOut(auth);
     
 } 
+
+/**
+ * * Change Password
+ * @param {{ currentPassword, newPassword }}
+ */
+export const updateUserPassword = async (currentPassword, newPassword) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user || !user.email) {
+    throw new Error('User not authenticated or missing email');
+    }
+
+    const credentials = EmailAuthProvider.credential(user.email, currentPassword);
+
+    try {
+        await reauthenticateWithCredential(user, credentials);
+
+        await updatePassword(user, newPassword);
+
+        return { success: true };
+    } catch (error) {
+        console.error('Password update failed:', error);
+        return { success: false, message: error.message };
+    }
+}
