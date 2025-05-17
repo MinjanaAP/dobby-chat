@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Typography,
     Switch,
@@ -7,6 +7,7 @@ import {
     Box,
 } from '@mui/material';
 import { Bell, MessageSquare, AtSign } from 'lucide-react';
+import SnackBarAlert from '../SnackBarAlert';
 
 const notifications = [
     {
@@ -30,6 +31,7 @@ const notifications = [
 ];
 
 const NotificationsTab = () => {
+    const [alertOpen, setAlertOpen]= useState(false);
     return (
         <Stack spacing={4}>
             <Typography
@@ -49,6 +51,7 @@ const NotificationsTab = () => {
                     <Paper
                         key={index}
                         elevation={2}
+                        onClick={() => setAlertOpen(true)}
                         sx={{
                             display: 'flex',
                             justifyContent: 'space-between',
@@ -72,16 +75,23 @@ const NotificationsTab = () => {
                             </Box>
                             <Box display="flex" alignItems="start" flexDirection='column'>
                                 <Typography fontWeight={500}>{item.title}</Typography>
-                                <Typography variant="body2" color="#F5F5F573">
+                                <Typography variant="body2" color="#F5F5F573" textAlign='start'>
                                     {item.description}
                                 </Typography>
                             </Box>
                         </Box>
-                        <Switch defaultChecked={item.checked} color="primary" />
+                        <Switch defaultChecked={item.checked} color="primary" disabled />
                     </Paper>
                 ))}
             </Stack>
+            <SnackBarAlert
+                open={alertOpen}
+                onClose={() => setAlertOpen(false)}
+                severity="warning"
+                message="These functions are not allowed yet to users."
+            />
         </Stack>
+        
     );
 };
 

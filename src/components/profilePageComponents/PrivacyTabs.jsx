@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Eye, EyeOff, Users } from 'lucide-react'
 import {
     Box,
@@ -11,11 +11,21 @@ import {
     FormControlLabel,
     Paper,
 } from '@mui/material'
+import SnackBarAlert from '../SnackBarAlert'
 
 const PrivacyTab = () => {
     const [profileVisibility, setProfileVisibility] = useState('public')
     const [onlineStatus, setOnlineStatus] = useState(true)
     const [readReceipts, setReadReceipts] = useState(true)
+    const [alertOpen, setAlertOpen] = useState(false);
+
+    useEffect(() => {
+        if (!onlineStatus || !readReceipts) {
+            setAlertOpen(true);
+            setOnlineStatus(true);
+            setReadReceipts(true);
+        }
+    },[onlineStatus, readReceipts]);
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -61,12 +71,12 @@ const PrivacyTab = () => {
                         <Typography variant="subtitle1" fontWeight={500} color='#ffffff'>
                             Profile Visibility
                         </Typography>
-                        <Typography variant="body2" color="#F5F5F56A">
+                        <Typography variant="body2" color="#F5F5F56A" textAlign='start'>
                             Control who can see your profile
                         </Typography>
                     </Box>
                 </Box>
-                <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
+                <FormControl variant="outlined" size="small" sx={{ minWidth: 80 }}>
                     <InputLabel id="profile-visibility-label">Visibility</InputLabel>
                     <Select
                         labelId="profile-visibility-label"
@@ -90,8 +100,8 @@ const PrivacyTab = () => {
                         }}
                     >
                         <MenuItem value="public">Public</MenuItem>
-                        <MenuItem value="friends">Friends Only</MenuItem>
-                        <MenuItem value="private">Private</MenuItem>
+                        <MenuItem value="friends" disabled>Friends Only</MenuItem>
+                        <MenuItem value="private" disabled>Private</MenuItem>
                     </Select>
                 </FormControl>
             </Paper>
@@ -126,7 +136,7 @@ const PrivacyTab = () => {
                         <Typography variant="subtitle1" fontWeight={500} color='#ffffff'>
                             Online Status
                         </Typography>
-                        <Typography variant="body2" color="#F5F5F572">
+                        <Typography variant="body2" color="#F5F5F572" textAlign='start'>
                             Show when you're active
                         </Typography>
                     </Box>
@@ -175,7 +185,7 @@ const PrivacyTab = () => {
                         <Typography variant="subtitle1" fontWeight={500} color='#ffffff'>
                             Read Receipts
                         </Typography>
-                        <Typography variant="body2" color="#F5F5F57C">
+                        <Typography variant="body2" color="#F5F5F57C" textAlign='start'>
                             Show when you've read messages
                         </Typography>
                     </Box>
@@ -193,7 +203,14 @@ const PrivacyTab = () => {
                     sx={{ color: 'white' }}
                 />
             </Paper>
+            <SnackBarAlert
+                open={alertOpen}
+                onClose={() => setAlertOpen(false)}
+                severity="warning"
+                message="These functions are not allowed yet to users."
+            />
         </Box>
+        
     )
 }
 

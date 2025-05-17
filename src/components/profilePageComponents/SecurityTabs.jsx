@@ -188,8 +188,8 @@ const SecurityTab = () => {
                             <Shield size={20} color="#4f46e5" />
                         </Box>
                         <Box>
-                            <Typography fontWeight={500}>Two-Factor Authentication</Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography fontWeight={500} color="#ffffff" textAlign='start'>Two-Factor Authentication</Typography>
+                            <Typography variant="body2" color="#FFFFFF5F" textAlign='start'>
                                 Add an extra layer of security
                             </Typography>
                         </Box>
@@ -197,6 +197,7 @@ const SecurityTab = () => {
 
                     <Button
                         variant="outlined"
+                        disabled
                         sx={{
                             borderColor: '#4f46e5',
                             color: '#4f46e5',

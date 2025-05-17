@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, User, MapPin, Calendar } from 'lucide-react';
+import { Mail, User, MapPin, Calendar, Lock } from 'lucide-react';
 import {
     Box,
     Grid,
@@ -9,10 +9,11 @@ import {
     Button,
 } from '@mui/material';
 
+
 const ProfileInfo = ({ userDetails, authUser }) => {
     //  console.log("User details in profile infoooooooooooooooo",JSON.stringify(authUser, null, 2));
     return (
-        <Box display="flex" flexDirection="column" gap={4}>
+        <Box display="flex" flexDirection="column" gap={4} >
             <Typography
                 variant="h5"
                 fontWeight="bold"
@@ -25,10 +26,10 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                 Profile Information
             </Typography>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{ width: '100%' }}>
                 {/* Username */}
-                <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="#ffffff" gutterBottom>
+                <Grid item xs={12} md={6} sx={{ minWidth:{ xs: '100%', md:'0%' } }}>
+                    <Typography variant="body2" color="#ffffff" gutterBottom ml={2} sx={{ width: '100%', textAlign:'start' }}>
                         Username
                     </Typography>
                     <TextField
@@ -66,8 +67,8 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                 </Grid>
 
                 {/* Email */}
-                <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="#ffffff" gutterBottom>
+                <Grid item xs={12} md={6} sx={{ minWidth:{ xs: '100%', md:'0%' } }} >
+                    <Typography variant="body2" color="#ffffff" gutterBottom ml={2} sx={{ width: '100%', textAlign:'start' }}>
                         Email
                     </Typography>
                     <TextField
@@ -82,6 +83,11 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                                     <Mail size={20} color="#888" />
                                 </InputAdornment>
                             ),
+                            endAdornment: (
+                                <InputAdornment position='end' >
+                                    <Lock size={20} color="#888"/>
+                                </InputAdornment>
+                            )
                         }}
                         sx={{
                             backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -100,7 +106,11 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                                 borderColor: '#4f46e5',
                             },
                             '& .Mui-disabled': {
-                                WebkitTextFillColor: '#ffffff',
+                                WebkitTextFillColor: '#FFFFFF6D',
+                            },
+                            '& input::placeholder': {
+                                color: '#ffffff',
+                                opacity: 1,
                             },
                             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                                 borderColor: '#4f46e5',
@@ -110,13 +120,13 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                 </Grid>
 
                 {/* Location */}
-                <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="#ffffff" gutterBottom>
+                <Grid item xs={12} md={6} sx={{ minWidth:{ xs: '100%', md:'0%' } }} >
+                    <Typography variant="body2" color="#ffffff" gutterBottom ml={2} sx={{ width: '100%', textAlign:'start' }}>
                         Location
                     </Typography>
                     <TextField
                         fullWidth
-                        defaultValue="San Francisco, CA"
+                        defaultValue= { userDetails.location ? userDetails.location : '' }
                         variant="outlined"
                         InputProps={{
                             startAdornment: (
@@ -149,8 +159,8 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                 </Grid>
 
                 {/* Joined Date */}
-                <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="#ffffff" gutterBottom>
+                <Grid item xs={12} md={6} sx={{ minWidth:{ xs: '100%', md:'0%' } }} >
+                    <Typography variant="body2" color="#ffffff" gutterBottom ml={2} sx={{ width: '100%', textAlign:'start' }} >
                         Joined
                     </Typography>
                     <TextField
@@ -172,6 +182,11 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                                     <Calendar size={20} color="#888" />
                                 </InputAdornment>
                             ),
+                            endAdornment: (
+                                <InputAdornment position='end' >
+                                    <Lock size={20} color="#888"/>
+                                </InputAdornment>
+                            )
                         }}
                         sx={{
                             backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -181,7 +196,7 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                                 borderColor: 'rgba(255,255,255,0.1)',
                             },
                             '& .Mui-disabled': {
-                                WebkitTextFillColor: '#ffffff',
+                                WebkitTextFillColor: '#FFFFFF5A',
                             },
                             '& input::placeholder': {
                                 color: '#ffffff',
