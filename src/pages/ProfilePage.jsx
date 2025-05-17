@@ -8,7 +8,6 @@ import { getUserDetails } from "../services/userServices";
 
 const ProfilePage = ({user}) => {
     const [userDetails,setUserDetails] = useState({});
-    console.log("User details",JSON.stringify(user, null, 2));
     useEffect(()=> {
         if (!user) return;
 

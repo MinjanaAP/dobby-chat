@@ -89,10 +89,6 @@ const ProfileTabs = ({ userDetails, authUser }) => {
             </Box>
             {/* Tab Content */}
             <Box p={3}>
-                {/* {activeTab === 'profile' && <ProfileInfo />}
-                {activeTab === 'notifications' && <NotificationsTab />}
-                {activeTab === 'security' && <SecurityTab />}
-                {activeTab === 'privacy' && <PrivacyTab />} */}
                 {activeTab === 'profile' && <ProfileInfo userDetails={userDetails} authUser={authUser}/>}
                 {activeTab === 'notifications' && <NotificationsTab/>}
                 {activeTab === 'security' && <SecurityTab/>}
