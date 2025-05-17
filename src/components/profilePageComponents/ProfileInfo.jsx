@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Mail, User, MapPin, Calendar, Lock } from 'lucide-react';
 import {
     Box,
@@ -7,11 +7,58 @@ import {
     TextField,
     InputAdornment,
     Button,
+    CircularProgress,
 } from '@mui/material';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import SnackBarAlert from '../SnackBarAlert';
+import CustomAlert from '../CustomAlert';
 
 
 const ProfileInfo = ({ userDetails, authUser }) => {
-    //  console.log("User details in profile infoooooooooooooooo",JSON.stringify(authUser, null, 2));
+    // console.log("User details in profile infoooooooooooooooo",JSON.stringify(userDetails, null, 2));
+    const [username, setUsername] = useState(userDetails.username || '');
+    const [location, setLocation] = useState(userDetails.location || '');
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [severity, setSeverity] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async () => {
+        if (!authUser.uid) return;
+
+        if (!username.trim()) {
+            setError('Username can\'t be empty.');
+            return;
+        } else if ( username.trim().length < 3) {
+            setError('Username must be at least 3 character long.');
+            return;
+        }
+        setError('');
+
+        try {
+            setLoading(true);
+            const userRef = doc(db, 'users', authUser.uid);
+            await updateDoc(userRef, {
+                username: username.trim(),
+                location: location.trim()
+            });
+            setLoading(false);
+            setAlertMessage('Profile updated successfully');
+            setSeverity('success');
+            setAlertOpen(true);
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            setAlertMessage('Failed to update profile. Please try again.');
+            setSeverity('error');
+            setAlertOpen(true);
+            setLoading(false);
+        }
+        // console.log("user details", username, location);
+    }
+
+
     return (
         <Box display="flex" flexDirection="column" gap={4} >
             <Typography
@@ -36,6 +83,7 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                         fullWidth
                         defaultValue={userDetails.username}
                         variant="outlined"
+                        onChange={(e) => setUsername(e.target.value)}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
@@ -128,6 +176,7 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                         fullWidth
                         defaultValue= { userDetails.location ? userDetails.location : '' }
                         variant="outlined"
+                        onChange={(e) => setLocation(e.target.value)}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
@@ -206,11 +255,19 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                     />
                 </Grid>
             </Grid>
+            {error && (
+                <CustomAlert
+                    severity='error'
+                    title='Error'
+                    message={error}
+                />
+            )}
 
             {/* Save Button */}
             <Box display="flex" justifyContent="flex-end">
                 <Button
                     variant="contained"
+                    onClick={handleSubmit}
                     sx={{
                         px: 4,
                         py: 1.5,
@@ -223,9 +280,18 @@ const ProfileInfo = ({ userDetails, authUser }) => {
                         },
                     }}
                 >
-                    Save Changes
+                    { loading ? 
+                    <>
+                        <Typography variant="body1" color="initial">Save Changes <CircularProgress color="inherit" size={18} /> </Typography>
+                    </> : 'Save Changes'}
                 </Button>
             </Box>
+            <SnackBarAlert
+                open={alertOpen}
+                onClose={() => setAlertOpen(false)}
+                severity={severity}
+                message={alertMessage}
+            />
         </Box>
     );
 };
