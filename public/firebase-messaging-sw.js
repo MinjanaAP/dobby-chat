@@ -13,17 +13,17 @@ appId:"1:565759435762:web:9c0839174a9a2351d7416b"
 const messaging = firebase.messaging();
 
 //* Handle Foreground Notifications
-messaging.onMessage((payload) => {
-    console.log('[Service Worker] Foreground message received:', payload);
+// messaging.onMessage((payload) => {
+//     console.log('[Service Worker] Foreground message received:', payload);
     
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: payload.notification.image || '../src/assets/images/logo.png',
-    };
+//     const notificationTitle = payload.notification.title;
+//     const notificationOptions = {
+//         body: payload.notification.body,
+//         icon: payload.notification.image || '../src/assets/images/logo.png',
+//     };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
-});
+//     self.registration.showNotification(notificationTitle, notificationOptions);
+// });
 
 //* Handle Background Notifications
 messaging.onBackgroundMessage((payload) => {
@@ -32,32 +32,32 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: payload.notification.image || '../src/assets/images/logo.png',
+        icon: payload.notification.image || 'https://res.cloudinary.com/dtv1nvsx9/image/upload/v1743941152/dobby-logo-enhanced_t5mdxk.png',
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 //* Handle  Notifications Work Even When App is Fully Closed
-self.addEventListener('push', (event) => {
-    console.log('[Service Worker] Push event received:', event);
+// self.addEventListener('push', (event) => {
+//     console.log('[Service Worker] Push event received:', event);
 
-    if (!event.data) {
-        console.error('[Service Worker] Push event has no data.');
-        return;
-    }
+//     if (!event.data) {
+//         console.error('[Service Worker] Push event has no data.');
+//         return;
+//     }
 
-    const data = event.data.json();
-    const notificationTitle = data.notification.title || 'New Notification';
-    const notificationOptions = {
-        body: data.notification.body || '',
-        icon: data.notification.image || '../src/assets/images/logo.png',
-    };
+//     const data = event.data.json();
+//     const notificationTitle = data.notification.title || 'New Notification';
+//     const notificationOptions = {
+//         body: data.notification.body || '',
+//         icon: data.notification.image || '../src/assets/images/logo.png',
+//     };
 
-    event.waitUntil(
-        self.registration.showNotification(notificationTitle, notificationOptions)
-    );
-});
+//     event.waitUntil(
+//         self.registration.showNotification(notificationTitle, notificationOptions)
+//     );
+// });
 
 //?  Handle notification click
 self.addEventListener('notificationclick', function(event) {
