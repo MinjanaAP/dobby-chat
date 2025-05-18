@@ -1,5 +1,5 @@
 import { Avatar, Typography, Box } from "@mui/material";
-import { CheckCheck } from "lucide-react";
+import { BotMessageSquare, MessageCircleDashed } from "lucide-react";
 import { useEffect, useState } from "react";
 import { db, rtdb } from "../../firebase";
 import { doc, onSnapshot } from "firebase/firestore";
@@ -19,6 +19,7 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
     const [unreadCount, setUnreadCount] = useState('');
     const [lastUpdate, setLastUpdate] = useState('');
     const [typingStatus, setTypingStatus] = useState({});
+    const [isMine, setIsMine] = useState(false);
 
     const [receiver, setReceiver] = useState({
         id:"",
@@ -87,6 +88,9 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
             );
             if(data.timestamp){
                 setLastUpdate(new Date(data.timestamp.second*1000));
+            }
+            if (data.lastMessageSenderId === authUser.uid) {
+                setIsMine(true);
             }
 
         });
@@ -166,8 +170,11 @@ export const ConversationCard = ({ conversation, onClick, authUser }) => {
                     </Box>
 
                     <Box display="flex" alignItems="center" gap={0.5}>
-                        {(unreadCount === 0 && !otherUserTyping && lastMessage )&& (
-                            <CheckCheck size={16} color="#4f46e5" style={{ flexShrink: 0 }} />
+                        {(!otherUserTyping && lastMessage )&& (
+                            <Typography variant="caption" color="inherit">
+                                {isMine ? "You : " : <BotMessageSquare size={16} color="#4f46e5" style={{ marginTop:6 }} /> }
+                                
+                            </Typography>
                         )}
                         <Typography
                             variant="body2"

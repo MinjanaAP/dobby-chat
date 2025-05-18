@@ -1,5 +1,5 @@
 import { AttachFileOutlined, InsertEmoticonOutlined } from "@mui/icons-material"
-import { Box, IconButton, Paper } from "@mui/material"
+import { Box, CircularProgress, IconButton, Paper } from "@mui/material"
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import { MicIcon, SendIcon, Send } from "lucide-react"
 import { useCallback, useRef, useState } from "react";
@@ -7,8 +7,9 @@ import { sendMessages, updateTypingStatus } from "../../api/firebase.service";
 import _ from "lodash"; 
 import { sendPushNotification } from "../../api/pushNotificationApi";
 
-export const ChatInput = ({conversation, authUser, receiverId}) => {
+export const ChatInput = ({conversation, authUser, receiverId, status}) => {
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
     const typingTimeoutRef = useRef(null);
     const isDesktop = window.innerWidth > 768;
     
@@ -20,14 +21,18 @@ export const ChatInput = ({conversation, authUser, receiverId}) => {
 
     const handleSend = async () => {
         if (message.trim()) {
+            setLoading(true);
+            const msg = message;
+            setMessage('');
             // console.log("Message : ", message + "\n Conversation id : " + JSON.stringify(conversation, null, 2) + "\n authUser id : " +authUser.uid);
-            const result = await sendMessages(message,conversation.id,authUser.uid);
+            const result = await sendMessages(msg,conversation.id,authUser.uid, status);
             // alert(JSON.stringify(authUser));
+            setLoading(false);
             const username = authUser.displayName ? authUser.displayName : authUser.email;
             const messageData = {
                 userId : receiverId,
                 title : "New Message",
-                body: `${username} : ${message}`
+                body: `${username} : ${msg}`
             }
             console.log("Message Data", messageData);
 
@@ -41,6 +46,7 @@ export const ChatInput = ({conversation, authUser, receiverId}) => {
                 console.error("Error in sending message : ", result);
             }
         }
+        
     }
 
     const handleTyping = (e) => {
@@ -120,7 +126,7 @@ export const ChatInput = ({conversation, authUser, receiverId}) => {
                         },
                     }}
                     >
-                    <Send className="w-5 h-5" />
+                    {loading ? <CircularProgress color="inherit" size={18} /> : <Send className="w-5 h-5" /> }
                 </IconButton>
             </Box>
         </Paper>
