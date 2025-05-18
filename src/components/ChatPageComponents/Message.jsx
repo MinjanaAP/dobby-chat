@@ -1,7 +1,8 @@
-import { DoneAllOutlined } from "@mui/icons-material";
+import { Done, DoneAllOutlined } from "@mui/icons-material";
 import { Box, Typography, Paper } from '@mui/material';
 
 export const Message = ({authUser, message}) => {
+    // console.log("Messgaes", message);
     const {
         content,
         timestamp,
@@ -44,7 +45,13 @@ export const Message = ({authUser, message}) => {
                     <Typography variant="caption" color="gray">
                         {formattedTimestamp}
                     </Typography>
-                    {isMine && status === 'read' && (
+                    {isMine && status === 'delivered' && (
+                        <DoneAllOutlined fontSize="small" sx={{ color: '#FFFFFF95' }} />
+                    )}
+                    {isMine && status === 'sent' && (
+                        <Done fontSize="small" sx={{ color: '#FFFFFF95' }} />
+                    )}
+                    {isMine && status === 'seen' && (
                         <DoneAllOutlined fontSize="small" sx={{ color: '#4f46e5' }} />
                     )}
                 </Box>
