@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
 import { ChatInput } from "./ChatInput";
-import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import { db, rtdb } from "../../firebase";
 import EmptyConversation from "./EmptyConversation";
 import { onValue, ref } from "firebase/database";
@@ -18,12 +18,12 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
     } = conversation;
 
     const [pinnedClose, setPinnedClose] = useState(false);
-    const [online, setOnline]  = useState(false);
+    const [online, setOnline] = useState(false);
     const [receiver, setReceiver] = useState({
-        id:"",
-        name:"",
-        profileImage:"",
-        typing:""
+        id: "",
+        name: "",
+        profileImage: "",
+        typing: ""
     });
     const [messages, setMessages] = useState([]);
     const [typingStatus, setTypingStatus] = useState({});
@@ -33,83 +33,99 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
         if (boxRef.current) {
             boxRef.current.scrollTop = boxRef.current.scrollHeight;
         }
-    },[messages]);
+    }, [messages]);
 
     useEffect(() => {
-            if (!conversation) return;
-            // console.error("conversation", JSON.stringify(conversation, null, 2));
-        
-            if (senderDetails.id === authUser.uid) {
-                setReceiver({
-                    id: receiverDetails.id,
-                    name: receiverDetails.name,
-                    profileImage: receiverDetails.profileImg,
-                    typing: typingStatus[receiverDetails.id]
-                });
-            } else {
-                setReceiver({
-                    id: senderDetails.id,
-                    name: senderDetails.name,
-                    profileImage: senderDetails.profileImg,
-                    typing: typingStatus[senderDetails.id]
-                });
-            }
-            
-        }, [conversation]);
+        if (!conversation) return;
+        // console.error("conversation", JSON.stringify(conversation, null, 2));
+
+        if (senderDetails.id === authUser.uid) {
+            setReceiver({
+                id: receiverDetails.id,
+                name: receiverDetails.name,
+                profileImage: receiverDetails.profileImg,
+                typing: typingStatus[receiverDetails.id]
+            });
+        } else {
+            setReceiver({
+                id: senderDetails.id,
+                name: senderDetails.name,
+                profileImage: senderDetails.profileImg,
+                typing: typingStatus[senderDetails.id]
+            });
+        }
+
+    }, [conversation]);
 
     //? get receiver online status
-        useEffect(() => {
-            if (!receiver?.id) return;
-            
-            const statusRef = ref(rtdb, `/status/${receiver.id}`);
-    
-            const unsubscribe = onValue(statusRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    // console.log("🔥 Got data:", data);
-                    setOnline(data.state === 'online');
-                } else {
-                    // console.log("⚠️ No snapshot at:", `/status/${receiver.id}`);
-                    setOnline(false); 
-                }
-            },
+    useEffect(() => {
+        if (!receiver?.id) return;
+
+        const statusRef = ref(rtdb, `/status/${receiver.id}`);
+
+        const unsubscribe = onValue(statusRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                // console.log("🔥 Got data:", data);
+                setOnline(data.state === 'online');
+            } else {
+                // console.log("⚠️ No snapshot at:", `/status/${receiver.id}`);
+                setOnline(false);
+            }
+        },
             (error) => { console.error("❌ Firebase listener error:", error); }
-            );
-    
-            return () => unsubscribe();
-        }, [receiver?.id]);
+        );
+
+        return () => unsubscribe();
+    }, [receiver?.id]);
 
     //? Fetch messages real-time
-    useEffect(()=>{
-        if(!conversation?.id) return;
+    useEffect(() => {
+        if (!conversation?.id) return;
 
         const messageRef = collection(db, "conversations", conversation.id, "messages");
-        const q = query(messageRef, orderBy("timestamp",'asc'));
+        const q = query(messageRef, orderBy("timestamp", "asc"));
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const msgs = snapshot.docs.map((doc)=> ({
-                id:doc.id,
-                ...doc.data()
-            }));
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
+            const msgs = [];
+            const updates = [];
+
+            snapshot.forEach((docSnap) => {
+                const msg = { id: docSnap.id, ...docSnap.data() };
+                msgs.push(msg);
+
+                if (msg.status !== "seen" && msg.senderId !== authUser.uid) {
+                    const msgRef = doc(db, "conversations", conversation.id, "messages", msg.id);
+                    updates.push(updateDoc(msgRef, { status: "seen" }));
+                }
+            });
+
             setMessages(msgs);
-            // console.log("Messages", JSON.stringify(msgs, null, 2));
+
+            try {
+                await Promise.all(updates);
+            } catch (error) {
+                console.error("❌ Error updating seen status:", error);
+            }
         });
+
         return () => unsubscribe();
-    },[conversation?.id]);
+    }, [conversation?.id, authUser.uid]);
+
 
     //? catch typing status change real-time
     useEffect(() => {
         const conversationRef = doc(db, 'conversations', conversation?.id);
 
         const unsubscribe = onSnapshot(conversationRef, (docSnap) => {
-            if(docSnap.exists()){
+            if (docSnap.exists()) {
                 const data = docSnap.data();
                 setTypingStatus(data.typingStatus || {});
             }
         });
 
         return () => unsubscribe();
-    },[conversation?.id]);
+    }, [conversation?.id]);
 
     const otherUserTyping = Object.entries(typingStatus).some(
         ([userId, isTyping]) => userId !== authUser.uid && isTyping
@@ -118,6 +134,42 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
     const closePinnedMessages = () => {
         setPinnedClose(true);
     }
+
+    //? Group messages by date
+    const groupMessages = (messages) => {
+
+        return messages.reduce((groups, message) => {
+            if (!message.timestamp?.seconds) return groups;
+
+            const date = new Date(message.timestamp?.seconds * 1000);
+            const dataKey = date.toDateString();
+
+            if (!groups[dataKey]) {
+                groups[dataKey] = [];
+            }
+            groups[dataKey].push(message);
+            return groups;
+        }, {});
+    };
+
+    //? Format Date Labels
+    const formatDateLabels = (dateStr) => {
+        const date = new Date(dateStr);
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) return "Today";
+        if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+
+        return date.toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+            year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+        });
+    };
+
+
     return (
         <Box display="flex" flexDirection="column" height="100vh">
             {/* Chat header */}
@@ -143,12 +195,12 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                             '&:hover': {
                                 backgroundColor: 'rgba(255,255,255,0.2)',
                             },
-                            p: 1 
+                            p: 1
                         }}
                     >
                         <ArrowBackIosNewRounded fontSize="small" />
                     </IconButton>
-                    
+
                     <Box position="relative">
                         <Avatar src={receiver.profileImage} alt={receiver.name} sx={{ width: 48, height: 48 }} />
                         {online && (
@@ -164,12 +216,12 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                             />
                         )}
                     </Box>
-                    
+
                     <Box justifyContent="start" >
                         <Typography fontWeight={500} color="white">
                             {receiver.name}
                         </Typography>
-                        { receiver.typing ? (
+                        {receiver.typing ? (
                             <Typography
                                 variant="body2"
                                 sx={{
@@ -181,33 +233,33 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                             >
                                 typing...
                             </Typography>
-                        ):(
-                            <Typography variant="body2" color="gray" sx={{ textAlign:"start" }}>
+                        ) : (
+                            <Typography variant="body2" color="gray" sx={{ textAlign: "start" }}>
                                 {online ? 'Online' : 'Offline'}
                             </Typography>
                         )}
-                        
-                        
+
+
                     </Box>
                 </Box>
 
                 {/* Right side - Action buttons */}
                 <Box display="flex" gap={1}>
-                    <IconButton sx={{ 
-                        color: 'gray', 
-                        '&:hover': { 
+                    <IconButton sx={{
+                        color: 'gray',
+                        '&:hover': {
                             backgroundColor: 'rgba(255,255,255,0.1)',
                             color: 'white'
-                        } 
+                        }
                     }}>
                         <Star size={20} />
                     </IconButton>
-                    <IconButton sx={{ 
-                        color: 'gray', 
-                        '&:hover': { 
+                    <IconButton sx={{
+                        color: 'gray',
+                        '&:hover': {
                             backgroundColor: 'rgba(255,255,255,0.1)',
                             color: 'white'
-                        } 
+                        }
                     }}>
                         <Pin size={20} />
                     </IconButton>
@@ -217,24 +269,43 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
             {/* //? Pinned messages */}
             {!pinnedClose && (
                 <PinnedMessages handleClose={closePinnedMessages} />
-            ) }
+            )}
 
-            <Box sx={{ flex:.8, overflowY:'auto', padding: 2 }} ref={boxRef}>
-                {messages.length === 0 ? ( 
+            <Box sx={{ flex: .8, overflowY: 'auto', padding: 2 }} ref={boxRef}>
+                {messages.length === 0 ? (
                     <EmptyConversation />
-                ):(
+                ) : (
                     <>
-                        {messages.map((message) => (
-                        <Message key={message.id} message={message} authUser={authUser}/>
+                        {Object.entries(groupMessages(messages)).map(([date, msgs]) => (
+                            <Box key={date}>
+                                <Box textAlign="center" my={2} >
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            color: 'gray',
+                                            backgroundColor: '#1a1a2e',
+                                            px: 2,
+                                            py: 0.5,
+                                            borderRadius: '20px',
+                                            display: 'inline-block'
+                                        }}
+                                    >
+                                        {formatDateLabels(date)}
+                                    </Typography>
+                                </Box>
+                                {msgs.map((message) => (
+                                    <Message key={message.id} message={message} authUser={authUser} />
+                                ))}
+                            </Box>
                         ))}
                         {otherUserTyping && (
-                            <TypingIndicator receiver={receiver?.name}/>
+                            <TypingIndicator receiver={receiver?.name} />
                         )}
                     </>
                 )}
-                
+
             </Box>
-            <ChatInput conversation={conversation} authUser={authUser} receiverId={receiver.id}/>
+            <ChatInput conversation={conversation} authUser={authUser} receiverId={receiver.id} status={online} />
         </Box>
     )
 }
