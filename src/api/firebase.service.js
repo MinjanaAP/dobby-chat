@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from "firebase/firestore"
 import { db } from "../firebase"
 
 
@@ -105,13 +105,14 @@ export const getConversationById = async (conversationId) => {
  * @param {* string} userId 
  * @returns 
  */
-export const sendMessages = async (message, conversationId, userId) => {
+export const sendMessages = async (message, conversationId, userId, status) => {
     try {
         const messageRef = collection(db, "conversations", conversationId, "messages");
 
         await addDoc(messageRef, {
             senderId: userId,
             content:message,
+            status: status === true ? "delivered" : "sent",
             timestamp: serverTimestamp()
         });
 
@@ -231,5 +232,47 @@ export const saveFCMTokenToUser = async (userId, token) => {
         }
     } catch (error) {
         console.error('Error saving FCM Token:', error);
+    }
+}
+
+/**
+ * * Update message status to delivered
+ */
+export const updateDeliveredMessages = async (loggedUserId) => {
+    try {
+        const conversationQuery = query(
+            collection(db, "conversations"),
+            where("participants", "array-contains", loggedUserId)
+        );
+
+        const conversationSnapshot = await getDocs(conversationQuery);
+
+        for (const convoDoc of conversationSnapshot.docs) {
+            const convoData = convoDoc.data();
+
+            if (convoData.lastMessage && convoData.lastMessageSenderId && convoData.lastMessageSenderId !== loggedUserId) {
+                const messageRef = collection(db, "conversations", convoDoc.id, "messages");
+
+                const unreadQuery = query(messageRef,
+                    where("senderId", "!=", loggedUserId),
+                    where("status", "==", "sent")
+                );
+
+                const unreadSnapshot = await getDocs(unreadQuery);
+                const batch = writeBatch(db);
+
+                unreadSnapshot.forEach((msgDoc) => {
+                    batch.update(msgDoc.ref, { status: "delivered" });
+                });
+
+                if (!unreadSnapshot.empty) {
+                    await batch.commit();
+                    console.log(`Updated delivered messages in conversation: ${convoDoc.id}`);
+                }
+            }
+        }
+        console.log("Message delivery status update complete.");
+    }catch (error) {
+        console.error("Failed to update delivered messages: ", error);
     }
 }
