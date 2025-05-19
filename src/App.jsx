@@ -67,56 +67,46 @@ useEffect(() => {
   let unsubscribe;
 
   const setupMessaging = async () => {
-    const supported = await isSupported();
-
-    if (!supported) {
-      console.warn("Firebase Messaging is not supported on this browser.");
-      setPermissionAlert(true);
-      setAlertMessage(
-        "Dobby ~ Chat is not fully supported on this browser.\nPlease try Safari or Chrome on Android/Windows."
-      );
-      return;
-    }
-
     try {
-      if ('Notification' in window) {
-        const permission = await Notification.requestPermission();
+      const supported = await isSupported();
 
-        if (permission === 'granted') {
-          const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-
-          if (token) {
-            console.log("FCM Token:", token);
-            localStorage.setItem("fcmToken", token);
-          } else {
-            console.log("No FCM Registration token available.");
-          }
-
-          //? Foreground message listener
-          unsubscribe = onMessage(messaging, (payload) => {
-            console.log("Message received in foreground:", payload);
-            const { title, body, image } = payload.notification;
-
-            new Notification(title, {
-              body,
-              icon: image || './assets/images/logo.png',
-            });
-          });
-        } else {
-          console.warn("Notification permission denied.");
-        }
-      } else {
-        console.warn("Notifications are not supported in this browser.");
+      if (!supported || !('serviceWorker' in navigator)) {
+        console.warn("Firebase Messaging is not supported in this browser.");
         setPermissionAlert(true);
         setAlertMessage(
-          "This browser does not support notifications from Dobby~Chat.\nPlease try Chrome or Safari on Android/Windows."
+          "Dobby ~ Chat is not supported on this browser.\nTry using Safari or Chrome on Android."
         );
+        return;
       }
-    } catch (err) {
-      console.error("Messaging setup failed:", err);
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.warn("Notification permission not granted.");
+        return;
+      }
+
+      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+      if (token) {
+        console.log("FCM Token:", token);
+        localStorage.setItem("fcmToken", token);
+      }
+
+      //? Foreground message handler
+      unsubscribe = onMessage(messaging, (payload) => {
+        console.log("Message received in foreground:", payload);
+        const { title, body, image } = payload.notification;
+
+        new Notification(title, {
+          body,
+          icon: image || './assets/images/logo.png',
+        });
+      });
+
+    } catch (error) {
+      console.error("Error setting up Firebase Messaging:", error);
       setPermissionAlert(true);
       setAlertMessage(
-        "An error occurred while enabling notifications.\nPlease try another browser."
+        "Notifications could not be enabled.\nTry using a different browser like Chrome on Android or Safari."
       );
     }
   };
@@ -127,6 +117,7 @@ useEffect(() => {
     if (unsubscribe) unsubscribe();
   };
 }, []);
+
 
 
 
