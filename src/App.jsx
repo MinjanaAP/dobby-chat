@@ -8,94 +8,121 @@ import SignUpPage from './pages/SignUpPage';
 import UserSearchPage from './pages/UserSearchPage';
 import LoadingPage from './components/LoadingPage';
 import { ChatPage } from './pages/ChatPage';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { db, rtdb } from './firebase.js';
 import { onDisconnect, onValue, ref, serverTimestamp, set } from 'firebase/database';
 import { doc, serverTimestamp as fsTimestamp, updateDoc } from 'firebase/firestore';
 import ProfilePage from './pages/ProfilePage.jsx';
+import { isSupported } from 'firebase/messaging';
+import SnackBarAlert from './components/SnackBarAlert.jsx';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPIDKEY;
 
-  export const setupPresence = (user) => {
-    if (!user) return;
+export const setupPresence = (user) => {
+  if (!user) return;
 
-    const userStatusDBRef = ref(rtdb, `/status/${user.uid}`);
-    const userDocRef = doc(db, "users", user.uid);
+  const userStatusDBRef = ref(rtdb, `/status/${user.uid}`);
+  const userDocRef = doc(db, "users", user.uid);
 
-    const isOffline = {
-      state: "offline",
-      lastActive: serverTimestamp(),
-    }
-
-    const isOnline = {
-      state : "online",
-      lastActive: serverTimestamp(),
-    }
-
-    const isOfflineForFirestore = {
-      status: "offline",
-      lastActive: fsTimestamp(),
-    };
-
-    const isOnlineForFirestore = {
-      status: "online",
-      lastActive: fsTimestamp(),
-    };
-
-    const connectedRef = ref(rtdb,".info/connected");
-    onValue(connectedRef, async (snapshot) => {
-      if (snapshot.val() === false) {
-        await updateDoc(userDocRef, isOfflineForFirestore);
-      return;
-      }
-    });
-
-    onDisconnect(userStatusDBRef).set(isOffline).then(async () => {
-      await set(userStatusDBRef, isOnline);
-      await updateDoc(userDocRef, isOnlineForFirestore);
-    })
+  const isOffline = {
+    state: "offline",
+    lastActive: serverTimestamp(),
   }
+
+  const isOnline = {
+    state: "online",
+    lastActive: serverTimestamp(),
+  }
+
+  const isOfflineForFirestore = {
+    status: "offline",
+    lastActive: fsTimestamp(),
+  };
+
+  const isOnlineForFirestore = {
+    status: "online",
+    lastActive: fsTimestamp(),
+  };
+
+  const connectedRef = ref(rtdb, ".info/connected");
+  onValue(connectedRef, async (snapshot) => {
+    if (snapshot.val() === false) {
+      await updateDoc(userDocRef, isOfflineForFirestore);
+      return;
+    }
+  });
+
+  onDisconnect(userStatusDBRef).set(isOffline).then(async () => {
+    await set(userStatusDBRef, isOnline);
+    await updateDoc(userDocRef, isOnlineForFirestore);
+  })
+}
 
 
 function App() {
-    useEffect(() => {
-    
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Message received in foreground:", payload);
+  const [permissionAlert, setPermissionAlert] =  useState(false);
+  const [alertMessage, setAlertMessage] = useState(false);
 
-      if (Notification.permission === 'granted') {
-        const { title, body, image } = payload.notification;
-        new Notification(title, {
-          body,
-          icon: image || './assets/images/logo.png',
+  useEffect(() => {
+    isSupported().then((supported) => {
+      if (!supported) {
+        console.warn("Firebase Messaging not supported on this browser.");
+        setPermissionAlert(true);
+        setAlertMessage("Dobby ~ Chat is not supported on this browser. \n Please try Chrome or Edge on Android.");
+        return;
+      }
+      // setPermissionAlert(false);
+      let unsubscribe;
+
+      if ('Notification' in window) {
+        // Listen for messages in the foreground
+        unsubscribe = onMessage(messaging, (payload) => {
+          console.log("Message received in foreground:", payload);
+
+          if (Notification.permission === 'granted') {
+            const { title, body, image } = payload.notification;
+            new Notification(title, {
+              body,
+              icon: image || './assets/images/logo.png',
+            });
+          }
         });
-      }
-    });
 
-    //? Request notification permission and get FCM token
-    Notification.requestPermission().then((permission) => {
-      if (permission === 'granted') {
-        getToken(messaging, { vapidKey: VAPID_KEY })
-          .then((currentToken) => {
-            if (currentToken) {
-              console.log("FCM Token:", currentToken);
-              localStorage.setItem("fcmToken", currentToken);
-            } else {
-              console.log("NO FCM Registration token available.");
-            }
-          })
-          .catch((err) => {
-            console.error("An error occurred while retrieving FCM token. ", err);
-          });
+        // Ask for notification permission
+        Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') {
+            getToken(messaging, { vapidKey: VAPID_KEY })
+              .then((currentToken) => {
+                if (currentToken) {
+                  console.log("FCM Token:", currentToken);
+                  localStorage.setItem("fcmToken", currentToken);
+                } else {
+                  console.log("NO FCM Registration token available.");
+                }
+              })
+              .catch((err) => {
+                console.error("An error occurred while retrieving FCM token. ", err);
+              });
+          }else {
+            setPermissionAlert(true);
+            setAlertMessage("Notification permission is not granted. \n You will not receive any real-time notifications from Dobby ~ Chat.")
+            console.warn("Notification permission not granted.");
+          }
+        });
+      } else {
+        setPermissionAlert(true);
+        setAlertMessage("This browser does not support notifications from Dobby~Chat.\n Please try Chrome or Edge in Android.")
+        console.warn("This browser does not support notifications.");
       }
-    });
 
-    return () => {
-      unsubscribe(); 
-    };
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+
+    });
   }, []);
 
-  
+
   const [user, loading] = useAuthState(auth);
 
   useEffect(() => {
@@ -105,43 +132,49 @@ function App() {
   }, [user]);
 
 
-  if (loading) return <LoadingPage/>; 
+  if (loading) return <LoadingPage />;
 
   return (
     <BrowserRouter>
       <Routes>
 
-        <Route 
-          path="/" 
-          element={<HomePage user={user}/>}
+        <Route
+          path="/"
+          element={<HomePage user={user} />}
         />
 
-        <Route 
-          path="/login" 
-          element={!user ? <LoginPage user={user} /> : <Navigate to="/" />} 
+        <Route
+          path="/login"
+          element={!user ? <LoginPage user={user} /> : <Navigate to="/" />}
         />
-        
 
-        <Route 
-          path="/signup" 
-          element={!user ? <SignUpPage user={user} /> : <Navigate to="/" />} 
+
+        <Route
+          path="/signup"
+          element={!user ? <SignUpPage user={user} /> : <Navigate to="/" />}
         />
-        
-        <Route 
-          path="/search-users" 
-          element={user ? <UserSearchPage user={user}/> : <Navigate to="/login" />} 
+
+        <Route
+          path="/search-users"
+          element={user ? <UserSearchPage user={user} /> : <Navigate to="/login" />}
         />
 
         <Route
           path='/conversations'
-          element={user ? <ChatPage user={user}/> : <Navigate to="/login" />} 
+          element={user ? <ChatPage user={user} /> : <Navigate to="/login" />}
         />
 
         <Route
           path='/profile'
-          element={ user ? <ProfilePage user={user}/> : <Navigate to="/login" />}
+          element={user ? <ProfilePage user={user} /> : <Navigate to="/login" />}
         />
       </Routes>
+        <SnackBarAlert
+        open={permissionAlert}
+        onClose={() => setPermissionAlert(false)}
+        severity='error'
+        message={alertMessage}
+        />
     </BrowserRouter>
   );
 }
