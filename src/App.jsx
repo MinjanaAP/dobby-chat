@@ -63,64 +63,71 @@ function App() {
   const [permissionAlert, setPermissionAlert] =  useState(false);
   const [alertMessage, setAlertMessage] = useState(false);
 
-  useEffect(() => {
-    isSupported().then((supported) => {
-      if (!supported) {
-        console.warn("Firebase Messaging not supported on this browser.");
-        setPermissionAlert(true);
-        setAlertMessage("Dobby ~ Chat is not supported on this browser. \n Please try Chrome or Edge on Android.");
-        return;
-      }
-      // setPermissionAlert(false);
-      let unsubscribe;
+useEffect(() => {
+  let unsubscribe;
 
+  const setupMessaging = async () => {
+    const supported = await isSupported();
+
+    if (!supported) {
+      console.warn("Firebase Messaging is not supported on this browser.");
+      setPermissionAlert(true);
+      setAlertMessage(
+        "Dobby ~ Chat is not fully supported on this browser.\nPlease try Safari or Chrome on Android/Windows."
+      );
+      return;
+    }
+
+    try {
       if ('Notification' in window) {
-        // Listen for messages in the foreground
-        unsubscribe = onMessage(messaging, (payload) => {
-          console.log("Message received in foreground:", payload);
+        const permission = await Notification.requestPermission();
 
-          if (Notification.permission === 'granted') {
+        if (permission === 'granted') {
+          const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+
+          if (token) {
+            console.log("FCM Token:", token);
+            localStorage.setItem("fcmToken", token);
+          } else {
+            console.log("No FCM Registration token available.");
+          }
+
+          //? Foreground message listener
+          unsubscribe = onMessage(messaging, (payload) => {
+            console.log("Message received in foreground:", payload);
             const { title, body, image } = payload.notification;
+
             new Notification(title, {
               body,
               icon: image || './assets/images/logo.png',
             });
-          }
-        });
-
-        // Ask for notification permission
-        Notification.requestPermission().then((permission) => {
-          if (permission === 'granted') {
-            getToken(messaging, { vapidKey: VAPID_KEY })
-              .then((currentToken) => {
-                if (currentToken) {
-                  console.log("FCM Token:", currentToken);
-                  localStorage.setItem("fcmToken", currentToken);
-                } else {
-                  console.log("NO FCM Registration token available.");
-                }
-              })
-              .catch((err) => {
-                console.error("An error occurred while retrieving FCM token. ", err);
-              });
-          }else {
-            setPermissionAlert(true);
-            setAlertMessage("Notification permission is not granted. \n You will not receive any real-time notifications from Dobby ~ Chat.")
-            console.warn("Notification permission not granted.");
-          }
-        });
+          });
+        } else {
+          console.warn("Notification permission denied.");
+        }
       } else {
+        console.warn("Notifications are not supported in this browser.");
         setPermissionAlert(true);
-        setAlertMessage("This browser does not support notifications from Dobby~Chat.\n Please try Chrome or Edge in Android.")
-        console.warn("This browser does not support notifications.");
+        setAlertMessage(
+          "This browser does not support notifications from Dobby~Chat.\nPlease try Chrome or Safari on Android/Windows."
+        );
       }
+    } catch (err) {
+      console.error("Messaging setup failed:", err);
+      setPermissionAlert(true);
+      setAlertMessage(
+        "An error occurred while enabling notifications.\nPlease try another browser."
+      );
+    }
+  };
 
-      return () => {
-        if (unsubscribe) unsubscribe();
-      };
+  setupMessaging();
 
-    });
-  }, []);
+  return () => {
+    if (unsubscribe) unsubscribe();
+  };
+}, []);
+
 
 
   const [user, loading] = useAuthState(auth);
@@ -172,7 +179,7 @@ function App() {
         <SnackBarAlert
         open={permissionAlert}
         onClose={() => setPermissionAlert(false)}
-        severity='error'
+        severity='warning'
         message={alertMessage}
         />
     </BrowserRouter>
