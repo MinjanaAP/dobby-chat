@@ -20,7 +20,7 @@ const UserSearchSection = ({currentUser})=>{
                 const allUsers = await getAllUsers();
                 setUsers(allUsers);
                 setLoading(false);
-                console.log(JSON.stringify(allUsers, null, 2));
+                // console.log(JSON.stringify(allUsers, null, 2));
             } catch (error) {
                 console.error("Failed to fetch users:", error);
                 setLoading(false);
