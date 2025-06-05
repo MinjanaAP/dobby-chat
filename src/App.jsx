@@ -72,10 +72,10 @@ useEffect(() => {
 
       if (!supported || !('serviceWorker' in navigator)) {
         console.warn("Firebase Messaging is not supported in this browser.");
-        setPermissionAlert(true);
-        setAlertMessage(
-          "Dobby ~ Chat is not supported on this browser.\nTry using Safari or Chrome on Android."
-        );
+        // setPermissionAlert(true);
+        // setAlertMessage(
+        //   "Dobby ~ Chat is not supported on this browser.\nTry using Safari or Chrome on Android."
+        // );
         return;
       }
 

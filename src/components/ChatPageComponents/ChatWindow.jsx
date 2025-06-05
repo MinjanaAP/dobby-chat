@@ -1,6 +1,6 @@
 import { ArrowBackIosNewRounded } from "@mui/icons-material";
 import { Avatar, Box, Typography, IconButton } from "@mui/material";
-import { Star, Pin } from 'lucide-react';
+import { Star, Pin, EllipsisVertical } from 'lucide-react';
 import { PinnedMessages } from "./PinnedMessages";
 import { useState, useEffect, useRef } from "react";
 import { Message } from "./Message";
@@ -171,7 +171,14 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
 
 
     return (
-        <Box display="flex" flexDirection="column" height="100vh">
+        <Box display="flex" flexDirection="column"
+            width="100%" 
+            maxWidth="100vw"
+            sx={{
+                height: '100dvh',
+                overflowX: 'hidden',
+                backgroundColor: '#0a0a1f'
+            }}>
             {/* Chat header */}
             <Box
                 display="flex"
@@ -183,7 +190,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                     borderBottom: '1px solid #2a2a4a',
                     backgroundColor: 'rgba(10,10,31,0.8)',
                     backdropFilter: 'blur(10px)',
-                    position: 'relative' // Added for proper positioning
+                    position: 'sticky'
                 }}
             >
                 {/* Left side - Back button and user info */}
@@ -263,6 +270,15 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                     }}>
                         <Pin size={20} />
                     </IconButton>
+                    <IconButton sx={{
+                        color: 'gray',
+                        '&:hover': {
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            color: 'white'
+                        }
+                    }}>
+                        <EllipsisVertical size={20} />
+                    </IconButton>
                 </Box>
             </Box>
 
@@ -305,7 +321,19 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                 )}
 
             </Box>
-            <ChatInput conversation={conversation} authUser={authUser} receiverId={receiver.id} status={online} />
+            <Box
+                sx={{
+                    paddingBottom: 'env(safe-area-inset-bottom)',
+                    backgroundColor: '#0a0a1f',
+                }}
+            >
+                <ChatInput
+                    conversation={conversation}
+                    authUser={authUser}
+                    receiverId={receiver.id}
+                    status={online}
+                />
+            </Box>
         </Box>
     )
 }
