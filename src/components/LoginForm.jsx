@@ -57,7 +57,7 @@ const LoginForm = ()=>{
         sx={{
             width:'100%',
             maxWidth: {
-                xs: "80%",
+                xs: "100%",
                 sm: "60%",
                 md: "50%",
                 lg: "40%",
