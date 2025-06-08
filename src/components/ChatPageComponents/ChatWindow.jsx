@@ -6,10 +6,13 @@ import { useState, useEffect, useRef } from "react";
 import { Message } from "./Message";
 import { TypingIndicator } from "./TypingIndicator";
 import { ChatInput } from "./ChatInput";
-import { collection, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import { db, rtdb } from "../../firebase";
 import EmptyConversation from "./EmptyConversation";
 import { onValue, ref } from "firebase/database";
+import { ChatDropDown } from "./ChatDropDown";
+import { ConfirmationDialog } from "./ConfirmationDialog";
+import SnackBarAlert from "../SnackBarAlert";
 
 export const ChatWindow = ({ conversation, onBack, authUser }) => {
     const {
@@ -28,6 +31,67 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
     const [messages, setMessages] = useState([]);
     const [typingStatus, setTypingStatus] = useState({});
     const boxRef = useRef(null);
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const [confirmDialog, setConfirmDialog] = useState({
+        open: false,
+        title: '',
+        message: '',
+        action: null
+    });
+
+    const [error, setError] = useState('');
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [severity, setSeverity] = useState('');
+
+    const handleMenuOpen = (e) => {
+        setAnchorEl(e.currentTarget);
+    }
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    }
+
+    const handleClearChat = () => {
+        setConfirmDialog({
+            open: true,
+            title: 'Clear Chat',
+            message: 'Are you sure you want to clear all messages in this chat? This action cannot be undone.',
+            action: async () => {
+                try {
+                    // Your clear chat implementation
+                } catch (error) {
+                    console.error("Error clearing chat:", error);
+                }
+            }
+        });
+        handleMenuClose();
+    };
+
+    const handleDeleteChat = () => {
+        setConfirmDialog({
+            open: true,
+            title: 'Delete Chat',
+            message: 'Are you sure you want to delete this entire conversation? This action cannot be undone.',
+            action: async () => {
+                try {
+                    if (!conversation?.id) return;
+
+                    await deleteDoc(doc(db, "conversations", conversation.id));
+
+                    handleMenuClose();
+                    onBack();
+                } catch (error) {
+                    console.error("Error deleting chat:", error);
+                    setSeverity('error')
+                    setError(`Error deleting chat,\n Please try again later.`);
+                    setAlertOpen(true);
+                }
+            }
+        });
+        handleMenuClose();
+    };
 
     useEffect(() => {
         if (boxRef.current) {
@@ -172,7 +236,7 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
 
     return (
         <Box display="flex" flexDirection="column"
-            width="100%" 
+            width="100%"
             maxWidth="100vw"
             sx={{
                 height: '100dvh',
@@ -270,16 +334,25 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                     }}>
                         <Pin size={20} />
                     </IconButton>
-                    <IconButton sx={{
-                        color: 'gray',
-                        '&:hover': {
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            color: 'white'
-                        }
-                    }}>
+                    <IconButton
+                        onClick={handleMenuOpen}
+                        sx={{
+                            color: 'gray',
+                            '&:hover': {
+                                backgroundColor: 'rgba(255,255,255,0.1)',
+                                color: 'white'
+                            }
+                        }}>
                         <EllipsisVertical size={20} />
                     </IconButton>
                 </Box>
+                <ChatDropDown
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleMenuClose}
+                    onDeleteChat={handleDeleteChat}
+                    onClearChat={handleClearChat}
+                />
             </Box>
 
             {/* //? Pinned messages */}
@@ -334,6 +407,19 @@ export const ChatWindow = ({ conversation, onBack, authUser }) => {
                     status={online}
                 />
             </Box>
+            <ConfirmationDialog
+                open={confirmDialog.open}
+                onClose={() => setConfirmDialog({ ...confirmDialog, open: false })}
+                onConfirm={confirmDialog.action}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+            />
+            <SnackBarAlert
+                onClose={() => setAlertOpen(false)}
+                open={alertOpen}
+                severity={severity}
+                message={error}
+            />
         </Box>
     )
 }
