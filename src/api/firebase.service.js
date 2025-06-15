@@ -125,7 +125,8 @@ export const sendMessages = async (message, conversationId, userId, status) => {
         await setDoc(conversationRef, {
             lastMessage: message,
             unreadCount,
-            lastMessageSenderId: userId
+            lastMessageSenderId: userId,
+            timestamp: serverTimestamp(),
         },{ merge: true });
 
         const response = {
