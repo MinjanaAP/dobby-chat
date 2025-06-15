@@ -2,12 +2,14 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputBase, List, ListItem, Paper, Button, Typography, useMediaQuery } from "@mui/material";
 import { ConversationCard } from "./ConversationCard";
 import { useEffect, useMemo, useState } from "react";
-import { getLoggedUsersConversations } from "../../api/firebase.service";
+// import { getLoggedUsersConversations } from "../../api/firebase.service";
+import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import ConversationCardSkeleton from "../Skeleton/ConversationCardSkeleton";
 import EmptyConversationList from "./EmptyConversationList";
 import { useTheme } from '@mui/material/styles';
 import { MessageSquarePlus } from "lucide-react";
+import { db } from "../../firebase";
 
 
 export const ConversationList = ({ onSelectedConversation, authUser }) => {
@@ -19,27 +21,51 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+    // useEffect(() => {
+    //     if(!authUser) return;
+
+    //     const getConversation = async () =>{
+    //         try {
+    //             setLoading(true);
+    //             const conversations = await getLoggedUsersConversations(authUser.uid);
+    //             // console.log("conversations", JSON.stringify(conversations, null,2));
+    //             if(!conversations){
+    //                 console.error("Error in getting conversations.");
+    //             }
+    //             setConversations(conversations);
+    //             setLoading(false);
+    //         } catch (error) {
+    //             console.error(error);
+    //             setLoading(false);
+    //         }
+    //     }
+
+    //     getConversation();
+    // },[authUser]);
+
     useEffect(() => {
-        if(!authUser) return;
+        if (!authUser) return;
 
-        const getConversation = async () =>{
-            try {
-                setLoading(true);
-                const conversations = await getLoggedUsersConversations(authUser.uid);
-                // console.log("conversations", JSON.stringify(conversations, null,2));
-                if(!conversations){
-                    console.error("Error in getting conversations.");
-                }
-                setConversations(conversations);
-                setLoading(false);
-            } catch (error) {
-                console.error(error);
-                setLoading(false);
-            }
-        }
+        const q = query(
+            collection(db, "conversations"),
+            where("participants", "array-contains", authUser.uid),
+            orderBy("timestamp", "desc")
+        );
 
-        getConversation();
-    },[authUser]);
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const updatedConversations = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setConversations(updatedConversations);
+            setLoading(false);
+        }, (error) => {
+            console.error("❌ Error fetching conversations:", error);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [authUser]);
 
     const handleSearch = (text) => {
         setSearchText(text.toLowerCase());
@@ -48,7 +74,7 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
     const filteredConversation = useMemo(() => {
         if (!searchText) return conversations;
 
-        return conversations.filter(conversation => 
+        return conversations.filter(conversation =>
             conversation.receiverDetails.name?.toLowerCase().includes(searchText) ||
             conversation.senderDetails.name?.toLowerCase().includes(searchText)
         );
@@ -113,11 +139,11 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
                         overflow: 'hidden',
                         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                         '&:hover': {
-                        transform: 'scale(1.05)',
-                        boxShadow: '0 0 20px rgba(79, 70, 229, 0.5)',
+                            transform: 'scale(1.05)',
+                            boxShadow: '0 0 20px rgba(79, 70, 229, 0.5)',
                         },
                     }}
-                    >
+                >
                     {isMobile ? 'Add conversation' : 'Create New Conversation'}
                 </Button>
             </Box>
@@ -126,12 +152,12 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
             <Box flex={1} overflow="auto" paddingBottom={16}>
                 {!loading ? (
                     filteredConversation.length === 0 ? (
-                        <EmptyConversationList/>
-                    ):(
+                        <EmptyConversationList />
+                    ) : (
                         <List disablePadding>
                             {filteredConversation.map((conversation) => (
                                 <ListItem key={conversation.id} disableGutters >
-                                    <ConversationCard conversation={conversation} onClick={onSelectedConversation} authUser={authUser}/>
+                                    <ConversationCard conversation={conversation} onClick={onSelectedConversation} authUser={authUser} />
                                 </ListItem>
                             ))}
                         </List>
