@@ -45,7 +45,7 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
 
     useEffect(() => {
         if (!authUser) return;
-
+        setLoading(true);
         const q = query(
             collection(db, "conversations"),
             where("participants", "array-contains", authUser.uid),
@@ -60,7 +60,7 @@ export const ConversationList = ({ onSelectedConversation, authUser }) => {
             setConversations(updatedConversations);
             setLoading(false);
         }, (error) => {
-            console.error("❌ Error fetching conversations:", error);
+            console.error("Error fetching conversations:", error);
             setLoading(false);
         });
 
