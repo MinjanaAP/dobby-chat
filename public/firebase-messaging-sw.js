@@ -3,11 +3,11 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-apiKey: 'AIzaSyB5VyBvvJ6SZnPS5UKrAS-RegpU6sPbKic',
-authDomain: "live-chat-dd075.firebaseapp.com",
-projectId: "live-chat-dd075",
-messagingSenderId: "565759435762",
-appId:"1:565759435762:web:9c0839174a9a2351d7416b"
+apiKey: "AIzaSyBuENN_rqlfS-750as7z0cD_bCcPNHzPV8",
+authDomain: "dobby-chat-59438.firebaseapp.com",
+projectId: "dobby-chat-59438",
+messagingSenderId: "626668202461",
+appId: "1:626668202461:web:7c1113efe1d3a1aaae2e34"
 });
 
 const messaging = firebase.messaging();
